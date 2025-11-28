@@ -14,6 +14,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 import sqlite3
+import hashlib
 
 CUSTOM_RULES = {
     '.env': '600',
@@ -90,11 +91,16 @@ class ScanThread(QThread):
                 'size': file_stat.st_size,
                 'modified': datetime.fromtimestamp(file_stat.st_mtime)
             }
+        except PermissionError:
+            return {'error': 'Permission Denied'}
         except Exception as e:
             return None
 
     def determine_risk_level(self, info, filepath):
         """Menentukan tingkat risiko berdasarkan permission"""
+        if 'error' in info:
+            return 'High' # Treat inaccessible files as high risk or needs attention
+
         mode = info['mode']
 
         if mode in ['777', '666', '767', '676']:
@@ -142,6 +148,12 @@ class FilePermissionChecker(QMainWindow):
             )
         ''')
         self.db_conn.commit()
+        
+        # Confidentiality: Restrict database file permissions
+        try:
+            os.chmod('scan_logs.db', 0o600)
+        except Exception as e:
+            print(f"Failed to set secure permissions on database: {e}")
 
     def init_ui(self):
         self.setWindowTitle("File Permission Checker")
@@ -343,9 +355,9 @@ class FilePermissionChecker(QMainWindow):
 
         self.result_table.setItem(row, 1, QTableWidgetItem(file_data['relative']))
 
-        self.result_table.setItem(row, 2, QTableWidgetItem(info['mode']))
+        self.result_table.setItem(row, 2, QTableWidgetItem(info.get('mode', 'N/A')))
 
-        self.result_table.setItem(row, 3, QTableWidgetItem(info['symbolic']))
+        self.result_table.setItem(row, 3, QTableWidgetItem(info.get('symbolic', 'N/A')))
 
         risk_item = QTableWidgetItem(file_data['risk'])
         risk_item.setTextAlignment(Qt.AlignCenter)
@@ -363,11 +375,20 @@ class FilePermissionChecker(QMainWindow):
         expected = file_data['expected'] if file_data['expected'] else '-'
         self.result_table.setItem(row, 5, QTableWidgetItem(expected))
 
-        size_str = self.format_size(info['size'])
-        self.result_table.setItem(row, 6, QTableWidgetItem(size_str))
+        if 'error' in info:
+             self.result_table.setItem(row, 6, QTableWidgetItem("N/A"))
+             self.result_table.setItem(row, 7, QTableWidgetItem("N/A"))
+             # Mark row as disabled/grayed out
+             for col in range(self.result_table.columnCount()):
+                 item = self.result_table.item(row, col)
+                 if item:
+                     item.setForeground(Qt.gray)
+        else:
+            size_str = self.format_size(info['size'])
+            self.result_table.setItem(row, 6, QTableWidgetItem(size_str))
 
-        modified_str = info['modified'].strftime('%Y-%m-%d %H:%M')
-        self.result_table.setItem(row, 7, QTableWidgetItem(modified_str))
+            modified_str = info['modified'].strftime('%Y-%m-%d %H:%M')
+            self.result_table.setItem(row, 7, QTableWidgetItem(modified_str))
 
     def format_size(self, size):
         """Format file size"""
@@ -500,7 +521,13 @@ class FilePermissionChecker(QMainWindow):
             elif format_type == 'json':
                 self.export_to_json(filename)
 
-            QMessageBox.information(self, "Export Success", f"Results exported to:\n{filename}")
+            # Confidentiality: Restrict export file permissions
+            os.chmod(filename, 0o600)
+
+            # Integrity: Generate Checksum
+            self.generate_checksum(filename)
+
+            QMessageBox.information(self, "Export Success", f"Results exported to:\n{filename}\n\nChecksum file created.")
             self.statusBar.showMessage(f"Exported to {filename}")
         except Exception as e:
             QMessageBox.critical(self, "Export Error", f"Failed to export:\n{str(e)}")
@@ -552,6 +579,20 @@ class FilePermissionChecker(QMainWindow):
 
         with open(filename, 'w', encoding='utf-8') as jsonfile:
             json.dump(export_data, jsonfile, indent=2, ensure_ascii=False)
+
+    def generate_checksum(self, filename):
+        """Generate SHA256 checksum for file integrity"""
+        sha256_hash = hashlib.sha256()
+        with open(filename, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        
+        checksum_file = filename + ".sha256"
+        with open(checksum_file, "w") as f:
+            f.write(sha256_hash.hexdigest())
+        
+        # Secure the checksum file as well
+        os.chmod(checksum_file, 0o600)
 
     def log_scan_to_database(self):
         """Log scan results to database"""

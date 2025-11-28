@@ -135,6 +135,22 @@ python main.py
 2. Use **"Search"** box untuk cari file specific
 3. Table updates automatically
 
+## 🛡️ CIA Triad Implementation
+
+Aplikasi ini menerapkan prinsip **Confidentiality, Integrity, dan Availability (CIA)** untuk keamanan data:
+
+### 1. Confidentiality (Kerahasiaan) 🔒
+- **Secure Logs**: Database log (`scan_logs.db`) otomatis di-set ke permission `600` (hanya owner yang bisa baca/tulis).
+- **Secure Exports**: File hasil export (CSV/JSON) juga otomatis di-set ke permission `600` untuk mencegah akses tidak sah.
+
+### 2. Integrity (Integritas) ✅
+- **Checksum Verification**: Setiap kali melakukan export, aplikasi akan membuat file checksum `.sha256`.
+- **Tamper Detection**: User bisa memverifikasi bahwa file report tidak dimodifikasi dengan membandingkan hash-nya.
+
+### 3. Availability (Ketersediaan) 🛡️
+- **Robust Scanning**: Scanner menangani error permission (`PermissionError`) dengan graceful.
+- **Error Reporting**: File yang tidak bisa diakses akan ditandai sebagai "Permission Denied" di tabel, bukan crash atau di-skip diam-diam.
+
 ## 🔒 Permission Analysis
 
 ### Risk Levels
