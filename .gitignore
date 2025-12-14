@@ -1,0 +1,5 @@
+.venv
+scan_logs.db
+scan_logs.db-wal
+__pycache__
+.idea
