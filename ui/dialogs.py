@@ -1,8 +1,3 @@
-"""
-Dialog Modern untuk FilePermissionChecker
-Antarmuka yang ditingkatkan dengan glassmorphism dan animasi
-"""
-
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, 
     QPushButton, QCheckBox, QGroupBox, QGridLayout, QDialogButtonBox,
@@ -14,7 +9,6 @@ from PyQt5.QtGui import QColor, QFont
 
 
 class ModernDialog(QDialog):
-    """Kelas dasar untuk dialog modern"""
     
     def __init__(self, parent=None, title="Dialog"):
         super().__init__(parent)
@@ -99,7 +93,6 @@ class ModernDialog(QDialog):
 
 
 class PasswordDialog(ModernDialog):
-    """Dialog untuk memasukkan password dengan antarmuka modern"""
     
     def __init__(self, parent=None, title="Enter Password"):
         super().__init__(parent, title)
@@ -111,7 +104,6 @@ class PasswordDialog(ModernDialog):
         layout.setContentsMargins(30, 30, 30, 30)
         layout.setSpacing(20)
         
-        # Header
         header = QLabel("🔐 " + self.windowTitle())
         header.setStyleSheet("""
             font-size: 18px;
@@ -121,7 +113,6 @@ class PasswordDialog(ModernDialog):
         """)
         layout.addWidget(header)
         
-        # Password input
         pass_label = QLabel("Password:")
         pass_label.setStyleSheet("font-weight: 600;")
         layout.addWidget(pass_label)
@@ -132,7 +123,6 @@ class PasswordDialog(ModernDialog):
         self.password_input.setMinimumHeight(45)
         layout.addWidget(self.password_input)
         
-        # Confirm password
         confirm_label = QLabel("Confirm Password:")
         confirm_label.setStyleSheet("font-weight: 600;")
         layout.addWidget(confirm_label)
@@ -143,14 +133,12 @@ class PasswordDialog(ModernDialog):
         self.confirm_input.setMinimumHeight(45)
         layout.addWidget(self.confirm_input)
         
-        # Show password checkbox
         self.show_password = QCheckBox("👁️ Show password")
         self.show_password.toggled.connect(self.toggle_password_visibility)
         layout.addWidget(self.show_password)
         
         layout.addSpacing(10)
         
-        # Buttons
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         
@@ -189,7 +177,6 @@ class PasswordDialog(ModernDialog):
 
 
 class AdvancedPermissionDialog(ModernDialog):
-    """Dialog untuk mengubah hak akses dengan antarmuka modern"""
     
     def __init__(self, parent=None, file_count: int = 1):
         super().__init__(parent, "Advanced Permission Settings")
@@ -206,7 +193,6 @@ class AdvancedPermissionDialog(ModernDialog):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(15)
         
-        # Header
         header_layout = QHBoxLayout()
         
         header = QLabel(f"🔧 Permission Settings")
@@ -230,12 +216,10 @@ class AdvancedPermissionDialog(ModernDialog):
         
         layout.addLayout(header_layout)
         
-        # Visual Permission Editor
         self.visual_editor_group = QGroupBox("📊 Visual Permission Editor")
         visual_layout = QGridLayout()
         visual_layout.setSpacing(15)
         
-        # Headers
         visual_layout.addWidget(QLabel(""), 0, 0)
         
         read_header = QLabel("Read")
@@ -250,7 +234,6 @@ class AdvancedPermissionDialog(ModernDialog):
         exec_header.setStyleSheet("font-weight: 600; color: #ef4444;")
         visual_layout.addWidget(exec_header, 0, 3, Qt.AlignCenter)
         
-        # User permissions
         user_label = QLabel("👤 Owner")
         user_label.setStyleSheet("font-weight: 600;")
         visual_layout.addWidget(user_label, 1, 0)
@@ -265,7 +248,6 @@ class AdvancedPermissionDialog(ModernDialog):
         visual_layout.addWidget(self.user_write, 1, 2, Qt.AlignCenter)
         visual_layout.addWidget(self.user_execute, 1, 3, Qt.AlignCenter)
         
-        # Group permissions
         group_label = QLabel("👥 Group")
         group_label.setStyleSheet("font-weight: 600;")
         visual_layout.addWidget(group_label, 2, 0)
@@ -279,7 +261,6 @@ class AdvancedPermissionDialog(ModernDialog):
         visual_layout.addWidget(self.group_write, 2, 2, Qt.AlignCenter)
         visual_layout.addWidget(self.group_execute, 2, 3, Qt.AlignCenter)
         
-        # Others permissions
         others_label = QLabel("🌐 Others")
         others_label.setStyleSheet("font-weight: 600;")
         visual_layout.addWidget(others_label, 3, 0)
@@ -296,13 +277,11 @@ class AdvancedPermissionDialog(ModernDialog):
         self.visual_editor_group.setLayout(visual_layout)
         layout.addWidget(self.visual_editor_group)
         
-        # Connect signals
         for checkbox in [self.user_read, self.user_write, self.user_execute,
                         self.group_read, self.group_write, self.group_execute,
                         self.others_read, self.others_write, self.others_execute]:
             checkbox.stateChanged.connect(self.update_permission_from_visual)
         
-        # Octal Input
         octal_group = QGroupBox("🔢 Octal Permission")
         octal_layout = QHBoxLayout()
         
@@ -327,7 +306,6 @@ class AdvancedPermissionDialog(ModernDialog):
         octal_group.setLayout(octal_layout)
         layout.addWidget(octal_group)
         
-        # Presets
         presets_group = QGroupBox("⚡ Quick Presets")
         presets_layout = QGridLayout()
         presets_layout.setSpacing(10)
@@ -363,7 +341,6 @@ class AdvancedPermissionDialog(ModernDialog):
         presets_group.setLayout(presets_layout)
         layout.addWidget(presets_group)
         
-        # CIA Options
         cia_group = QGroupBox("🛡️ Security & Backup Options")
         cia_layout = QVBoxLayout()
         cia_layout.setSpacing(12)
@@ -385,7 +362,6 @@ class AdvancedPermissionDialog(ModernDialog):
         cia_group.setLayout(cia_layout)
         layout.addWidget(cia_group)
         
-        # Buttons
         btn_layout = QHBoxLayout()
         
         preview_btn = QPushButton("👁️ Preview")
@@ -422,11 +398,9 @@ class AdvancedPermissionDialog(ModernDialog):
         
         layout.addLayout(btn_layout)
         
-        # Initialize
         self.update_visual_from_permission("644")
     
     def update_permission_from_visual(self):
-        """Perbarui izin oktal dari editor visual"""
         user = (4 if self.user_read.isChecked() else 0) + \
                (2 if self.user_write.isChecked() else 0) + \
                (1 if self.user_execute.isChecked() else 0)
@@ -441,7 +415,6 @@ class AdvancedPermissionDialog(ModernDialog):
         
         permission = f"{user}{group}{others}"
         
-        # Block signals to avoid loop
         self.permission_input.blockSignals(True)
         self.permission_input.setText(permission)
         self.permission_input.blockSignals(False)
@@ -450,12 +423,10 @@ class AdvancedPermissionDialog(ModernDialog):
         self.add_to_history(permission)
     
     def update_visual_from_permission(self, permission: str):
-        """Perbarui editor visual dari izin oktal"""
         if len(permission) != 3 or not permission.isdigit():
             return
         
         try:
-            # Block signals
             for checkbox in [self.user_read, self.user_write, self.user_execute,
                            self.group_read, self.group_write, self.group_execute,
                            self.others_read, self.others_write, self.others_execute]:
@@ -486,13 +457,11 @@ class AdvancedPermissionDialog(ModernDialog):
                 checkbox.blockSignals(False)
     
     def set_permission(self, permission: str):
-        """Atur izin dari preset"""
         self.permission_input.setText(permission)
         self.update_visual_from_permission(permission)
         self.add_to_history(permission)
     
     def add_to_history(self, permission: str):
-        """Tambahkan izin ke riwayat"""
         if self.permission_history and self.permission_history[-1] == permission:
             return
         
@@ -501,7 +470,6 @@ class AdvancedPermissionDialog(ModernDialog):
         self.current_history_index = len(self.permission_history) - 1
     
     def preview(self):
-        """Pratinjau perubahan"""
         permission = self.permission_input.text()
         symbolic = self.get_symbolic_permission(permission)
         
@@ -527,7 +495,6 @@ class AdvancedPermissionDialog(ModernDialog):
         msg.exec_()
     
     def get_symbolic_permission(self, permission: str) -> str:
-        """Konversi oktal ke simbolik"""
         if len(permission) != 3:
             return "Invalid"
         
@@ -541,7 +508,6 @@ class AdvancedPermissionDialog(ModernDialog):
         return symbolic
     
     def get_settings(self) -> dict:
-        """Dapatkan semua pengaturan"""
         return {
             'permission': self.permission_input.text(),
             'backup': self.backup_checkbox.isChecked(),
@@ -552,7 +518,6 @@ class AdvancedPermissionDialog(ModernDialog):
 
 
 class SettingsDialog(ModernDialog):
-    """Dialog untuk pengaturan aplikasi"""
     
     def __init__(self, parent=None):
         super().__init__(parent, "Settings")
@@ -564,7 +529,6 @@ class SettingsDialog(ModernDialog):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(15)
         
-        # Header
         header = QLabel("⚙️ Application Settings")
         header.setStyleSheet("""
             font-size: 18px;
@@ -574,7 +538,6 @@ class SettingsDialog(ModernDialog):
         """)
         layout.addWidget(header)
         
-        # Theme settings
         theme_group = QGroupBox("🎨 Theme")
         theme_layout = QVBoxLayout()
         
@@ -585,7 +548,6 @@ class SettingsDialog(ModernDialog):
         theme_group.setLayout(theme_layout)
         layout.addWidget(theme_group)
         
-        # Scan settings
         scan_group = QGroupBox("🔍 Scan Settings")
         scan_layout = QGridLayout()
         scan_layout.setSpacing(12)
@@ -603,7 +565,6 @@ class SettingsDialog(ModernDialog):
         scan_group.setLayout(scan_layout)
         layout.addWidget(scan_group)
         
-        # Security settings
         security_group = QGroupBox("🔒 Security Settings")
         security_layout = QGridLayout()
         security_layout.setSpacing(12)
@@ -621,7 +582,6 @@ class SettingsDialog(ModernDialog):
         security_group.setLayout(security_layout)
         layout.addWidget(security_group)
         
-        # Backup settings
         backup_group = QGroupBox("💾 Backup Settings")
         backup_layout = QGridLayout()
         backup_layout.setSpacing(12)
@@ -636,7 +596,6 @@ class SettingsDialog(ModernDialog):
         
         layout.addStretch()
         
-        # Buttons
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         

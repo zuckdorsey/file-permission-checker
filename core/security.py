@@ -1,8 +1,3 @@
-"""
-Security Manager - CIA Confidentiality & Availability (Kerahasiaan & Ketersediaan)
-Menangani enkripsi, password, dan pembatasan laju (rate limiting)
-"""
-
 import os
 import base64
 import json
@@ -19,19 +14,16 @@ from core.secure_memory import SecureString, SecureBuffer
 
 
 class RateLimiter:
-    """CIA Availability - Lindungi dari serangan brute force"""
     
     def __init__(self, max_attempts: int = 5, window_seconds: int = 300):
         self.max_attempts = max_attempts
         self.window_seconds = window_seconds
-        self.attempts = {}  # {ip/user: [timestamp, ...]}
+        self.attempts = {}
         self.lock = threading.Lock()
     
     def check_limit(self, key: str) -> Dict:
-        """Cek apakah permintaan diizinkan"""
         with self.lock:
             now = time.time()
-            # Bersihkan percobaan lama
             if key in self.attempts:
                 self.attempts[key] = [t for t in self.attempts[key] 
                                     if now - t < self.window_seconds]
@@ -47,10 +39,8 @@ class RateLimiter:
             }
     
     def record_attempt(self, key: str, success: bool = False):
-        """Catat percobaan"""
         with self.lock:
             if success:
-                # Reset jika sukses
                 if key in self.attempts:
                     del self.attempts[key]
             else:
@@ -60,7 +50,6 @@ class RateLimiter:
 
 
 class SecurityManager:
-    """Mengelola kunci enkripsi dan password"""
     
     def __init__(self):
         self.salt_file = '.master_password.secure'
@@ -69,7 +58,6 @@ class SecurityManager:
         self.session_expiry = 0
     
     def derive_key(self, password: str, salt: bytes = None) -> Tuple[bytes, bytes]:
-        """Turunkan kunci kriptografi dari password menggunakan PBKDF2"""
         if salt is None:
             salt = os.urandom(16)
             
@@ -83,12 +71,6 @@ class SecurityManager:
         return key, salt
     
     def encrypt_data(self, data: bytes, password: str) -> Dict[str, bytes]:
-        """Enkripsi data menggunakan AES-GCM (melalui Fernet untuk kesederhanaan)"""
-        # Catatan: Fernet menggunakan AES-128-CBC dengan HMAC-SHA256
-        # Untuk kebutuhan AES-GCM spesifik CIA, kita bisa mengimplementasikannya langsung
-        # Tapi Fernet adalah wrapper aman standar.
-        # Mari gunakan Fernet untuk konsistensi dengan implementasi sebelumnya
-        
         key, salt = self.derive_key(password)
         f = Fernet(key)
         encrypted = f.encrypt(data)
@@ -98,13 +80,11 @@ class SecurityManager:
         }
         
     def decrypt_data(self, encrypted_data: bytes, password: str, salt: bytes) -> bytes:
-        """Dekripsi data"""
         key, _ = self.derive_key(password, salt)
         f = Fernet(key)
         return f.decrypt(encrypted_data)
     
     def check_password_strength(self, password: str) -> Dict:
-        """Analisis kekuatan password"""
         score = 0
         feedback = []
         
@@ -137,6 +117,5 @@ class SecurityManager:
         }
         
     def generate_secure_password(self, length: int = 16) -> str:
-        """Generate password yang aman secara kriptografi"""
         alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+"
         return "".join(secrets.choice(alphabet) for _ in range(length))

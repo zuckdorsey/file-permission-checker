@@ -5,7 +5,6 @@ from typing import Dict, Optional, List
 from PyQt5.QtCore import QThread, pyqtSignal, QMutex
 
 class ScanThread(QThread):
-    """Thread untuk memindai folder"""
     progress = pyqtSignal(int, str)
     file_found = pyqtSignal(dict)
     stats_update = pyqtSignal(dict)
@@ -23,7 +22,6 @@ class ScanThread(QThread):
         self.file_count = 0
         self.total_files = 0
         
-        # Statistics
         self.stats = {
             'total_files': 0,
             'total_size': 0,
@@ -38,20 +36,16 @@ class ScanThread(QThread):
         }
     
     def cancel(self):
-        """Batalkan proses pemindaian"""
         self.mutex.lock()
         self.is_cancelled = True
         self.mutex.unlock()
     
     def run(self):
-        """Proses pemindaian utama"""
         try:
             self.stats['start_time'] = datetime.now().isoformat()
             
-            # Pindai file
             self._scan_folder(self.folder_path)
             
-            # Perbarui statistik akhir
             self.stats['end_time'] = datetime.now().isoformat()
             self.stats['duration'] = (datetime.now() - datetime.fromisoformat(self.stats['start_time'])).total_seconds()
             
@@ -63,10 +57,8 @@ class ScanThread(QThread):
             self.error.emit(str(e), traceback.format_exc())
     
     def _scan_folder(self, folder_path: str):
-        """Pindai folder secara rekursif"""
         try:
             for root, dirs, files in os.walk(folder_path):
-                # Cek pembatalan
                 self.mutex.lock()
                 if self.is_cancelled:
                     self.mutex.unlock()
@@ -86,7 +78,6 @@ class ScanThread(QThread):
                             progress = int((self.file_count / min(self.total_files, self.max_files)) * 100)
                             self.progress.emit(min(progress, 100), f"Scanned {self.file_count} files")
                     
-                    # Cek jika mencapai batas file
                     if self.file_count >= self.max_files:
                         break
                 
@@ -98,9 +89,7 @@ class ScanThread(QThread):
             self.error.emit(f"Scan error: {str(e)}", traceback.format_exc())
     
     def _scan_file(self, filepath: str) -> Optional[Dict]:
-        """Pindai satu file"""
         try:
-            # Cek jika symlink
             is_symlink = os.path.islink(filepath)
             if is_symlink:
                 self.stats['symlinks'] += 1
@@ -108,10 +97,8 @@ class ScanThread(QThread):
             else:
                 stat_func = os.stat
             
-            # Dapatkan info file
             file_stat = stat_func(filepath)
             
-            # Dapatkan izin
             mode = file_stat.st_mode
             is_readable = bool(mode & stat.S_IRUSR)
             is_writable = bool(mode & stat.S_IWUSR)
@@ -122,10 +109,8 @@ class ScanThread(QThread):
             
             relative_path = os.path.relpath(filepath, self.folder_path)
             
-            # Tentukan tingkat risiko
             risk_level = self._determine_risk_level(mode_octal, filepath, is_symlink)
             
-            # Cek aturan kustom
             expected_perm = self._check_custom_rules(filepath)
             
             file_data = {
@@ -158,15 +143,12 @@ class ScanThread(QThread):
             return None
     
     def _determine_risk_level(self, mode: str, filepath: str, is_symlink: bool) -> str:
-        """Menentukan tingkat risiko"""
         if is_symlink:
             return 'Medium'
         
-        # Izin risiko tinggi
         if mode in ['777', '666', '767', '676']:
             return 'High'
         
-        # Dapat ditulis atau dieksekusi oleh dunia (World writable/executable)
         if mode[1] in ['6', '7'] or mode[2] in ['6', '7']:
             sensitive_extensions = ['.env', '.key', '.pem', '.conf', '.ini', '.sql', '.db', '.pwd']
             if any(filepath.endswith(ext) for ext in sensitive_extensions):
@@ -176,7 +158,6 @@ class ScanThread(QThread):
         return 'Low'
     
     def _check_custom_rules(self, filepath: str) -> Optional[str]:
-        """Cek aturan kustom"""
         filename = os.path.basename(filepath)
         for pattern, expected_perm in self.custom_rules.items():
             if pattern in filepath or filename == pattern:
@@ -184,7 +165,6 @@ class ScanThread(QThread):
         return None
     
     def _update_stats(self, file_data: Dict):
-        """Perbarui statistik"""
         self.stats['total_files'] += 1
         self.stats['total_size'] += file_data['info']['size']
         

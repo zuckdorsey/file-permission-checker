@@ -40,7 +40,7 @@ class ModernSplashScreen(QSplashScreen):
 
         title_font = QFont('Segoe UI', 26, QFont.Bold)
         painter.setFont(title_font)
-        painter.drawText(0, 120, 550, 45, Qt.AlignCenter, "🔒 File Permission Checker")
+        painter.drawText(0, 120, 550, 45, Qt.AlignCenter, " File Permission Checker")
 
         subtitle_font = QFont('Segoe UI', 13)
         painter.setFont(subtitle_font)
@@ -65,14 +65,12 @@ class ModernSplashScreen(QSplashScreen):
         )
 
 def load_styles(app: QApplication):
-    """Memuat styles aplikasi"""
     style_path = os.path.join(os.path.dirname(__file__), 'style.qss')
 
     if os.path.exists(style_path):
         with open(style_path, 'r') as f:
             app.setStyleSheet(f.read())
     else:
-
         app.setStyleSheet("""
             QMainWindow { background-color: #1a1a2e; }
             QWidget { color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
@@ -91,8 +89,6 @@ def load_styles(app: QApplication):
         """)
 
 def main():
-    """Titik masuk utama aplikasi"""
-
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
 

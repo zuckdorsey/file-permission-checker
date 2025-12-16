@@ -3,17 +3,14 @@ import os
 from datetime import datetime
 
 def init_database():
-    """Initialize SQLite database"""
     try:
         conn = sqlite3.connect('scan_logs.db', timeout=10)
         cursor = conn.cursor()
         
-        # Enable WAL mode untuk better concurrency
         cursor.execute("PRAGMA journal_mode=WAL")
         cursor.execute("PRAGMA synchronous=NORMAL")
         cursor.execute("PRAGMA foreign_keys=ON")
         
-        # Table untuk scan logs
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS scan_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +27,6 @@ def init_database():
             )
         ''')
         
-        # Table untuk encryption logs
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS encryption_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +42,6 @@ def init_database():
             )
         ''')
         
-        # Table untuk backup logs
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS backup_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,7 +57,6 @@ def init_database():
             )
         ''')
         
-        # Table untuk permission changes
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS permission_changes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,14 +71,12 @@ def init_database():
             )
         ''')
         
-        # Index untuk performance
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_scan_date ON scan_logs(scan_date)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_encryption_timestamp ON encryption_logs(timestamp)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_backup_timestamp ON backup_logs(timestamp)')
         
         conn.commit()
         
-        # Set secure permissions
         try:
             os.chmod('scan_logs.db', 0o600)
             for ext in ['-wal', '-shm']:
@@ -98,11 +90,9 @@ def init_database():
         
     except Exception as e:
         print(f"Database initialization error: {e}")
-        # Fallback to in-memory database
         return sqlite3.connect(':memory:')
 
 def log_scan(conn, scan_data: dict):
-    """Log scan ke database"""
     try:
         cursor = conn.cursor()
         cursor.execute('''
@@ -126,7 +116,6 @@ def log_scan(conn, scan_data: dict):
         return False
 
 def log_encryption(conn, encryption_data: dict):
-    """Log encryption operation"""
     try:
         cursor = conn.cursor()
         cursor.execute('''
@@ -149,7 +138,6 @@ def log_encryption(conn, encryption_data: dict):
         return False
 
 def log_backup(conn, backup_data: dict):
-    """Log backup operation"""
     try:
         cursor = conn.cursor()
         cursor.execute('''
@@ -172,7 +160,6 @@ def log_backup(conn, backup_data: dict):
         return False
 
 def log_permission_change(conn, change_data: dict):
-    """Log permission change"""
     try:
         cursor = conn.cursor()
         cursor.execute('''
@@ -194,7 +181,6 @@ def log_permission_change(conn, change_data: dict):
         return False
 
 def get_scan_history(conn, limit=100):
-    """Dapatkan riwayat scan"""
     try:
         cursor = conn.cursor()
         cursor.execute('''
@@ -207,23 +193,18 @@ def get_scan_history(conn, limit=100):
         return []
 
 def get_statistics(conn):
-    """Dapatkan statistics dari database"""
     try:
         cursor = conn.cursor()
         
-        # Total scans
         cursor.execute('SELECT COUNT(*) FROM scan_logs')
         total_scans = cursor.fetchone()[0]
         
-        # Total files scanned
         cursor.execute('SELECT SUM(total_files) FROM scan_logs')
         total_files = cursor.fetchone()[0] or 0
         
-        # Total size scanned
         cursor.execute('SELECT SUM(total_size) FROM scan_logs')
         total_size = cursor.fetchone()[0] or 0
         
-        # Recent scans
         cursor.execute('''
             SELECT folder_path, total_files, scan_date 
             FROM scan_logs 

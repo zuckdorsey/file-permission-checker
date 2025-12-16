@@ -1,15 +1,9 @@
-"""
-Widget Warisan - Ditingkatkan dengan gaya modern
-Mempertahankan kompatibilitas mundur sambil menambahkan fitur visual baru
-"""
-
 from PyQt5.QtWidgets import QLabel, QProgressBar, QTableWidgetItem
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
 
 
 class StatusLabel(QLabel):
-    """Label status kustom dengan warna berbeda - DITINGKATKAN"""
     
     STATUS_STYLES = {
         'info': {
@@ -59,13 +53,11 @@ class StatusLabel(QLabel):
         """)
     
     def set_status(self, status: str):
-        """Ubah status dan perbarui gaya"""
         self.status = status
         self._apply_style()
 
 
 class ColoredProgressBar(QProgressBar):
-    """Progress bar dengan warna berdasarkan nilai - DITINGKATKAN"""
     
     def __init__(self):
         super().__init__()
@@ -91,19 +83,15 @@ class ColoredProgressBar(QProgressBar):
         self.update_color()
     
     def update_color(self):
-        """Update warna berdasarkan progress"""
         value = self.value()
         
         if value < 30:
-            # Red gradient
             color_start = "#ef4444"
             color_end = "#dc2626"
         elif value < 70:
-            # Orange/Yellow gradient  
             color_start = "#f59e0b"
             color_end = "#d97706"
         else:
-            # Green gradient
             color_start = "#10b981"
             color_end = "#059669"
         
@@ -126,7 +114,6 @@ class ColoredProgressBar(QProgressBar):
 
 
 class RiskTableWidgetItem(QTableWidgetItem):
-    """Item widget tabel dengan warna berdasarkan tingkat risiko - DITINGKATKAN"""
     
     RISK_COLORS = {
         'High': {
@@ -149,7 +136,6 @@ class RiskTableWidgetItem(QTableWidgetItem):
         self._apply_style()
     
     def _apply_style(self):
-        """Atur warna berdasarkan tingkat risiko"""
         colors = self.RISK_COLORS.get(self.risk_level, self.RISK_COLORS['Low'])
         
         self.setBackground(colors['bg'])
@@ -161,13 +147,11 @@ class RiskTableWidgetItem(QTableWidgetItem):
         self.setFont(font)
     
     def set_risk_level(self, level: str):
-        """Perbarui tingkat risiko"""
         self.risk_level = level
         self._apply_style()
 
 
 class InfoBadge(QLabel):
-    """Widget lencana informasi"""
     
     BADGE_TYPES = {
         'primary': '#667eea',
@@ -204,7 +188,6 @@ class InfoBadge(QLabel):
 
 
 class PermissionDisplay(QLabel):
-    """Widget untuk menampilkan izin dengan penyorotan sintaks"""
     
     def __init__(self, octal: str = "644", parent=None):
         super().__init__(parent)
@@ -243,7 +226,6 @@ class PermissionDisplay(QLabel):
         return symbolic.strip()
     
     def _colorize_symbolic(self, symbolic: str) -> str:
-        # For rich text display
         colored = ""
         for char in symbolic:
             if char == 'r':
@@ -265,7 +247,6 @@ class PermissionDisplay(QLabel):
 
 
 class FileIcon(QLabel):
-    """Widget ikon tipe file"""
     
     ICONS = {
         'directory': '📁',

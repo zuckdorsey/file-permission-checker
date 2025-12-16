@@ -1,8 +1,3 @@
-"""
-Widget Modern untuk FilePermissionChecker
-Widget kustom dengan glassmorphism dan animasi
-"""
-
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QProgressBar, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QHBoxLayout, QFrame,
@@ -19,7 +14,6 @@ from PyQt5.QtGui import (
 
 
 class GlassCard(QFrame):
-    """Kontainer dengan efek glassmorphism"""
     
     def __init__(self, parent=None, blur_radius: int = 20):
         super().__init__(parent)
@@ -48,7 +42,6 @@ class GlassCard(QFrame):
 
 
 class ModernButton(QPushButton):
-    """Tombol gradien dengan animasi hover"""
     
     STYLES = {
         'primary': {
@@ -150,7 +143,6 @@ class ModernButton(QPushButton):
 
 
 class AnimatedProgressBar(QProgressBar):
-    """Progress bar dengan efek cahaya dan animasi"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -159,7 +151,6 @@ class AnimatedProgressBar(QProgressBar):
         self._glow_opacity = 0.5
         self._setup_style()
         
-        # Glow animation
         self._glow_timer = QTimer(self)
         self._glow_timer.timeout.connect(self._animate_glow)
         self._glow_direction = 1
@@ -206,7 +197,6 @@ class AnimatedProgressBar(QProgressBar):
 
 
 class PillBadge(QLabel):
-    """Lencana tingkat risiko dengan gaya pil"""
     
     RISK_STYLES = {
         'High': {
@@ -265,7 +255,6 @@ class PillBadge(QLabel):
 
 
 class ModernTableWidget(QTableWidget):
-    """Tabel bergaya dengan estetika modern"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -319,7 +308,6 @@ class ModernTableWidget(QTableWidget):
 
 
 class RiskTableWidgetItem(QTableWidgetItem):
-    """Item widget tabel dengan warna berdasarkan tingkat risiko - DITINGKATKAN"""
     
     COLORS = {
         'High': {
@@ -354,7 +342,6 @@ class RiskTableWidgetItem(QTableWidgetItem):
 
 
 class StatCard(GlassCard):
-    """Kartu statistik untuk dashboard"""
     
     def __init__(self, title: str, value: str = "0", 
                  icon: str = "📊", color: str = "#667eea", parent=None):
@@ -370,7 +357,6 @@ class StatCard(GlassCard):
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
         
-        # Header with icon
         header_layout = QHBoxLayout()
         
         icon_label = QLabel(self.icon)
@@ -385,7 +371,6 @@ class StatCard(GlassCard):
         
         layout.addLayout(header_layout)
         
-        # Value
         self.value_label = QLabel(self.value)
         self.value_label.setStyleSheet(f"""
             font-size: 32px;
@@ -394,7 +379,6 @@ class StatCard(GlassCard):
         """)
         layout.addWidget(self.value_label)
         
-        # Title
         title_label = QLabel(self.title)
         title_label.setStyleSheet("""
             font-size: 13px;
@@ -411,7 +395,6 @@ class StatCard(GlassCard):
 
 
 class ToastNotification(QFrame):
-    """Widget notifikasi toast"""
     
     TYPES = {
         'success': {
@@ -456,12 +439,10 @@ class ToastNotification(QFrame):
         layout.setContentsMargins(15, 12, 15, 12)
         layout.setSpacing(12)
         
-        # Icon
         icon_label = QLabel(config['icon'])
         icon_label.setStyleSheet("font-size: 18px;")
         layout.addWidget(icon_label)
         
-        # Message
         msg_label = QLabel(self.message)
         msg_label.setStyleSheet("""
             color: white;
@@ -473,7 +454,6 @@ class ToastNotification(QFrame):
         self.setFixedHeight(50)
         self.setMinimumWidth(250)
         
-        # Shadow
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(20)
         shadow.setColor(QColor(0, 0, 0, 100))
@@ -483,7 +463,6 @@ class ToastNotification(QFrame):
     def _setup_animation(self):
         self._opacity = 1.0
         
-        # Auto-hide timer
         self._hide_timer = QTimer(self)
         self._hide_timer.timeout.connect(self._fade_out)
         self._hide_timer.setSingleShot(True)
@@ -497,7 +476,6 @@ class ToastNotification(QFrame):
 
 
 class LoadingSpinner(QWidget):
-    """Spinner pemuatan beranimasi"""
     
     def __init__(self, size: int = 40, parent=None):
         super().__init__(parent)
@@ -522,17 +500,14 @@ class LoadingSpinner(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         
-        # Center
         cx = self.width() / 2
         cy = self.height() / 2
         radius = min(cx, cy) - 4
         
-        # Draw arc
         pen = QPen()
         pen.setWidth(4)
         pen.setCapStyle(Qt.RoundCap)
         
-        # Gradient effect with rotation
         gradient = QLinearGradient(0, 0, self.width(), self.height())
         gradient.setColorAt(0, QColor(102, 126, 234))
         gradient.setColorAt(1, QColor(118, 75, 162))
@@ -549,7 +524,6 @@ class LoadingSpinner(QWidget):
 
 
 class ModernLineEdit(QWidget):
-    """Line edit bergaya modern dengan label melayang"""
     
     def __init__(self, placeholder: str = "", parent=None):
         from PyQt5.QtWidgets import QLineEdit
@@ -593,7 +567,6 @@ class ModernLineEdit(QWidget):
         self.line_edit.setEchoMode(mode)
 
 
-# Export all widgets
 __all__ = [
     'GlassCard',
     'ModernButton', 

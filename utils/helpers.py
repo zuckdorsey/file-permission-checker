@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import Dict, Any
 
 def format_size(size_bytes: int) -> str:
-    """Format ukuran file untuk tampilan"""
     for unit in ['B', 'KB', 'MB', 'GB']:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
@@ -12,7 +11,6 @@ def format_size(size_bytes: int) -> str:
     return f"{size_bytes:.2f} TB"
 
 def get_file_hash(filepath: str) -> str:
-    """Hasilkan hash SHA256 untuk file"""
     sha256_hash = hashlib.sha256()
     try:
         with open(filepath, "rb") as f:
@@ -23,11 +21,9 @@ def get_file_hash(filepath: str) -> str:
         return "ERROR"
 
 def format_timestamp(timestamp: datetime) -> str:
-    """Format stempel waktu untuk tampilan"""
     return timestamp.strftime('%Y-%m-%d %H:%M:%S')
 
 def safe_chmod(filepath: str, mode: int) -> bool:
-    """Ubah izin file secara aman dengan penanganan kesalahan"""
     try:
         os.chmod(filepath, mode)
         return True
@@ -35,7 +31,6 @@ def safe_chmod(filepath: str, mode: int) -> bool:
         return False
 
 def validate_path(path: str) -> Dict[str, Any]:
-    """Validasi jalur dan kembalikan informasi"""
     result = {
         'exists': False,
         'is_dir': False,
@@ -62,7 +57,6 @@ def validate_path(path: str) -> Dict[str, Any]:
     return result
 
 def calculate_directory_size(path: str) -> int:
-    """Hitung total ukuran direktori secara rekursif"""
     total_size = 0
     try:
         for dirpath, dirnames, filenames in os.walk(path):

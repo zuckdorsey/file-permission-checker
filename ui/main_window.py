@@ -82,7 +82,7 @@ class FilePermissionChecker(QMainWindow):
     
     def init_ui(self):
         """Inisialisasi UI modern dengan Tab"""
-        self.setWindowTitle("🔒 File Permission Checker")
+        self.setWindowTitle(" File Permission Checker")
         self.setGeometry(100, 100, 1400, 850)
         self.setMinimumSize(1100, 650)
         
@@ -163,7 +163,7 @@ class FilePermissionChecker(QMainWindow):
         
         # Logo/Title
         title_layout = QVBoxLayout()
-        title_label = QLabel("🔒 File Permission Checker")
+        title_label = QLabel("File Permission Checker")
         title_label.setStyleSheet("font-size: 22px; font-weight: 700; color: #ffffff;")
         subtitle_label = QLabel("Scan • Encrypt • Backup")
         subtitle_label.setStyleSheet("font-size: 12px; color: #94a3b8;")
@@ -263,7 +263,7 @@ class FilePermissionChecker(QMainWindow):
         sidebar_layout.addStretch()
         
         # Version info
-        version_label = QLabel("v2.1.0 • Security Suite")
+        version_label = QLabel("Made with ❤️ by Human")
         version_label.setStyleSheet("color: #64748b; font-size: 10px; text-align: center;")
         version_label.setAlignment(Qt.AlignCenter)
         sidebar_layout.addWidget(version_label)

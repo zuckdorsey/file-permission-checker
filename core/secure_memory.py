@@ -1,8 +1,3 @@
-"""
-Secure Memory Handler - CIA Confidentiality (Kerahasiaan CIA)
-Menangani data sensitif di memori secara aman
-"""
-
 import ctypes
 import sys
 import os
@@ -10,7 +5,6 @@ import platform
 import subprocess
 from typing import Optional
 
-# Platform specific constants
 if platform.system() == 'Linux':
     LIBC = ctypes.CDLL('libc.so.6')
     M_LOCKALL = 1
@@ -18,7 +12,6 @@ if platform.system() == 'Linux':
 
 
 class SecureString:
-    """String yang membersihkan dirinya sendiri dari memori saat dihancurkan"""
     
     def __init__(self, value: str):
         self._value = value
@@ -40,14 +33,8 @@ class SecureString:
         return self._value
     
     def clear(self):
-        """Bersihkan memori secara aman"""
         if not self._cleared and hasattr(self, '_value'):
-            # Mencoba menimpa memori
-            # Catatan: String Python tidak dapat diubah jadi ini adalah usaha terbaik
-            # Untuk keamanan sejati kita memerlukan buffer tingkat-C, tapi ini membantu
-            # mencegah dump memori kasual
             try:
-                # Paksa petunjuk garbage collection
                 self._value = '0' * self._length
                 self._value = None
             except:
@@ -59,7 +46,6 @@ class SecureString:
 
 
 class SecureBuffer:
-    """Buffer untuk data biner yang membersihkan diri otomatis"""
     
     def __init__(self, data: bytes):
         self._buffer = bytearray(data)
@@ -75,16 +61,11 @@ class SecureBuffer:
         return bytes(self._buffer)
         
     def clear(self):
-        """Timpa buffer dengan nol"""
         for i in range(self._length):
             self._buffer[i] = 0
 
 
 def secure_delete_file(path: str, passes: int = 1) -> bool:
-    """
-    Hapus file secara aman dengan menimpa cek
-    CIA Confidentiality - Mencegah pemulihan data
-    """
     if not os.path.exists(path):
         return False
         
@@ -92,12 +73,10 @@ def secure_delete_file(path: str, passes: int = 1) -> bool:
         file_size = os.path.getsize(path)
         
         with open(path, 'wb') as f:
-            # Pass 1: Zeros
             f.write(b'\x00' * file_size)
             f.flush()
             os.fsync(f.fileno())
             
-            # Pass 2: Random (if requested)
             if passes > 1:
                 f.seek(0)
                 f.write(os.urandom(file_size))
