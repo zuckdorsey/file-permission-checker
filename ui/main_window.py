@@ -1,7 +1,7 @@
 """
-FilePermissionChecker v2.0
-Advanced File Permission Security Tool
-Focused on: Scanning, Analyzing, Fixing Permissions, Encryption, and Backup
+FilePermissionChecker v2.0 - Pemeriksa Izin File
+Alat Keamanan Izin File Tingkat Lanjut
+Fokus pada: Pemindaian, Analisis, Perbaikan Izin, Enkripsi, dan Pencadangan
 """
 
 import sys
@@ -44,7 +44,7 @@ from utils.helpers import format_size
 
 
 class FilePermissionChecker(QMainWindow):
-    """Main application window - Full Features"""
+    """Jendela utama aplikasi - Fitur Lengkap"""
     
     def __init__(self):
         super().__init__()
@@ -68,7 +68,7 @@ class FilePermissionChecker(QMainWindow):
         self.setAcceptDrops(True)
     
     def load_stylesheet(self):
-        """Load modern stylesheet"""
+        """Muat stylesheet modern"""
         try:
             style_path = os.path.join(os.path.dirname(__file__), '..', 'style.qss')
             if os.path.exists(style_path):
@@ -81,7 +81,7 @@ class FilePermissionChecker(QMainWindow):
             print(f"Failed to load stylesheet: {e}")
     
     def init_ui(self):
-        """Initialize modern UI with Tabs"""
+        """Inisialisasi UI modern dengan Tab"""
         self.setWindowTitle("🔒 File Permission Checker")
         self.setGeometry(100, 100, 1400, 850)
         self.setMinimumSize(1100, 650)
@@ -146,7 +146,7 @@ class FilePermissionChecker(QMainWindow):
         self.init_status_bar()
     
     def init_header(self):
-        """Initialize header bar"""
+        """Inisialisasi bilah header"""
         self.header_widget = QFrame()
         self.header_widget.setObjectName("headerBar")
         self.header_widget.setStyleSheet("""
@@ -189,7 +189,7 @@ class FilePermissionChecker(QMainWindow):
         header_layout.addWidget(export_csv_btn)
     
     def init_sidebar(self):
-        """Initialize sidebar with statistics"""
+        """Inisialisasi sidebar dengan statistik"""
         self.sidebar = GlassCard()
         self.sidebar.setFixedWidth(260)
         
@@ -269,7 +269,7 @@ class FilePermissionChecker(QMainWindow):
         sidebar_layout.addWidget(version_label)
     
     def _create_stat_item(self, icon: str, title: str, value: str, color: str) -> QFrame:
-        """Create mini stat widget"""
+        """Buat widget statistik mini"""
         frame = QFrame()
         frame.setStyleSheet(f"""
             QFrame {{
@@ -306,7 +306,7 @@ class FilePermissionChecker(QMainWindow):
     # ======================== SCANNER TAB ========================
     
     def init_scanner_tab(self):
-        """Initialize Scanner Tab"""
+        """Inisialisasi Tab Pemindai"""
         scan_tab = QWidget()
         scan_layout = QVBoxLayout(scan_tab)
         scan_layout.setContentsMargins(5, 5, 5, 5)
@@ -401,7 +401,7 @@ class FilePermissionChecker(QMainWindow):
     # ======================== ENCRYPTION TAB ========================
     
     def init_encryption_tab(self):
-        """Initialize Encryption Tab"""
+        """Inisialisasi Tab Enkripsi"""
         enc_tab = QWidget()
         layout = QVBoxLayout(enc_tab)
         layout.setContentsMargins(5, 5, 5, 5)
@@ -525,7 +525,7 @@ class FilePermissionChecker(QMainWindow):
     # ======================== BACKUP TAB ========================
     
     def init_backup_tab(self):
-        """Initialize Backup Tab"""
+        """Inisialisasi Tab Pencadangan"""
         backup_tab = QWidget()
         layout = QVBoxLayout(backup_tab)
         layout.setContentsMargins(5, 5, 5, 5)
@@ -641,7 +641,7 @@ class FilePermissionChecker(QMainWindow):
     # ======================== SHARED UTILITIES ========================
     
     def init_status_bar(self):
-        """Initialize status bar"""
+        """Inisialisasi bilah status"""
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("🟢 Ready - Drag a folder or click Browse to start")
@@ -660,19 +660,19 @@ class FilePermissionChecker(QMainWindow):
                 break
 
     def show_toast(self, message: str, toast_type: str = "info"):
-        """Show toast notification"""
+        """Tampilkan notifikasi toast"""
         toast = ToastNotification(message, toast_type, 3000, self)
         toast.move(self.width() - toast.width() - 20, 80)
         toast.show()
 
     def browse_path(self):
-        """Browse for folder (Scanner tab)"""
+        """Jelajahi folder (Tab Pemindai)"""
         path = QFileDialog.getExistingDirectory(self, "Select Folder to Scan")
         if path:
             self.path_input.setText(path)
             
     def setup_shortcuts(self):
-        """Setup keyboard shortcuts"""
+        """Siapkan pintasan keyboard"""
         QShortcut(QKeySequence("Ctrl+S"), self, lambda: self.tabs.setCurrentIndex(0) or self.start_scan())
         QShortcut(QKeySequence("Ctrl+F"), self, self.fix_permissions)
         QShortcut(QKeySequence("Ctrl+E"), self, lambda: self.export_results('csv'))
@@ -682,7 +682,7 @@ class FilePermissionChecker(QMainWindow):
     
     # Placeholder for brevity - implementing them below
     def start_scan(self):
-        """Start scanning folder"""
+        """Mulai memindai folder"""
         folderpath = self.path_input.text().strip()
         if not folderpath:
             self.show_toast("Please enter folder path", "warning")
@@ -771,14 +771,14 @@ class FilePermissionChecker(QMainWindow):
         return [self.all_files[row] for row in selected_rows if row < len(self.all_files)]
 
     def fix_permissions(self):
-        """Fix all risky permissions"""
+        """Perbaiki semua izin berisiko"""
         risky_files = [f for f in self.all_files if f['risk'] in ['High', 'Medium']]
         
         if not risky_files:
             self.show_toast("No risky permissions found! ✅", "success")
             return
         
-        # Ask for Quick Fix or Advanced
+        # Tanyakan Perbaikan Cepat atau Lanjutan
         msg = QMessageBox(self)
         msg.setWindowTitle('Fix Risky Permissions')
         msg.setText(f"Found {len(risky_files)} files with risky permissions.")
@@ -801,7 +801,7 @@ class FilePermissionChecker(QMainWindow):
             self._open_advanced_fix_dialog(risky_files)
     
     def fix_selected_permissions(self):
-        """Fix selected files permissions"""
+        """Perbaiki izin file yang dipilih"""
         selected_files = self.get_selected_files()
         
         if not selected_files:
@@ -811,24 +811,24 @@ class FilePermissionChecker(QMainWindow):
         self._open_advanced_fix_dialog(selected_files)
     
     def _open_advanced_fix_dialog(self, files: List[dict]):
-        """Open advanced permission dialog"""
+        """Buka dialog izin lanjutan"""
         dialog = AdvancedPermissionDialog(self, len(files))
         if dialog.exec_():
             settings = dialog.get_settings()
             self._apply_fixes(files, settings)
         
     def _apply_fixes(self, files: List[dict], settings: dict = None):
-        """Apply permission fixes with support for advanced options"""
+        """Terapkan perbaikan izin dengan dukungan opsi lanjutan"""
         filepaths = [f['path'] for f in files]
         custom_mode = int(settings['permission'], 8) if settings else None
         recursive = settings.get('recursive', False) if settings else False
         
-        # 1. Backup if requested
+        # 1. Buat backup jika diminta
         if settings and settings.get('backup'):
             self.status_bar.showMessage("📦 Creating backup before changes...")
             self.backup_manager.create_backup(filepaths, "Backup before permission fix")
         
-        # 2. Fix permissions
+        # 2. Perbaiki izin
         self.status_bar.showMessage("🔧 Fixing permissions...")
         results = self.permission_fixer.batch_fix_permissions(
             filepaths,
@@ -836,7 +836,7 @@ class FilePermissionChecker(QMainWindow):
             recursive=recursive
         )
         
-        # Log audit
+        # Catat audit
         audit_details = f"Fixed {results['success']} files"
         if custom_mode:
             audit_details += f" (Mode: {oct(custom_mode)})"
@@ -848,21 +848,21 @@ class FilePermissionChecker(QMainWindow):
             details=audit_details
         )
         
-        # 3. Encrypt if requested
+        # 3. Enkripsi jika diminta
         if settings and settings.get('encrypt'):
             self.status_bar.showMessage("🔒 Encrypting files...")
-            # We need checks here - usually we don't encrypt random system files
-            # But the user requested it. We'll use a default or ask for password?
-            # EncryptionWorker requires password. We can't do it silently without one.
-            # For now, show a warning or skip if no password context.
-            # Ideally AdvancedPermissionDialog should have asked for password if Encrypt was checked.
-            # Or we open encryption tab.
+            # Kita butuh pemeriksaan di sini - biasanya kita tidak mengenkripsi file sistem secara acak
+            # Tapi pengguna memintanya. Kita akan gunakan default atau minta password?
+            # EncryptionWorker membutuhkan password. Kita tidak bisa melakukannya secara diam-diam tanpa password.
+            # Untuk saat ini, tampilkan peringatan atau lewati jika tidak ada konteks password.
+            # Idealnya AdvancedPermissionDialog harus meminta password jika Enkripsi dicentang.
+            # Atau kita buka tab enkripsi.
             self.show_toast("Please use Encryption Tab for secure encryption", "info")
             
         self.show_toast(f"Fixed {results['success']} files", "success")
         self.status_bar.showMessage(f"✅ Fixed {results['success']} files • {results['failed']} failed")
         
-        # Rescan
+        # Pindai ulang
         QTimer.singleShot(500, self.start_scan)
 
     def export_results(self, format_type: str):
@@ -926,7 +926,7 @@ class FilePermissionChecker(QMainWindow):
         except: pass
 
     def check_cia_status(self):
-        """Check and display CIA Triad compliance status"""
+        """Periksa dan tampilkan status kepatuhan CIA Triad"""
         self.status_bar.showMessage("🛡️ Checking CIA status...")
         cia_status = self.integrity_manager.get_cia_status()
         

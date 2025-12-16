@@ -1,12 +1,40 @@
-# Constants for the file scanner application
-
-# Custom rules for file scanning
+# ============================ KONSTANTA ============================
 CUSTOM_RULES = {
-    'high_risk_extensions': ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com'],
-    'medium_risk_extensions': ['.dll', '.sys', '.drv', '.ocx'],
-    'suspicious_permissions': [0o777, 0o666],
-    'max_file_age_days': 365
+    '.env': '600',
+    '.git': '700',
+    'storage': '755',
+    'config': '644',
+    'private': '600',
 }
 
-# Maximum file size to scan in MB
-MAX_FILE_SIZE_MB = 100
+MAX_FILE_SIZE_MB = 100  # Batas ukuran file untuk dipindai (MB)
+BACKUP_HISTORY_LIMIT = 50  # Batas jumlah cadangan yang disimpan
+SCAN_CACHE_DURATION = 300  # Durasi cache pemindaian (5 menit)
+
+# Warna tingkat risiko
+RISK_COLORS = {
+    'High': '#FF4444',
+    'Medium': '#FFAA00',
+    'Low': '#44FF44'
+}
+
+# Ekstensi file yang dianggap sensitif
+SENSITIVE_EXTENSIONS = [
+    '.env', '.key', '.pem', '.conf', '.ini', '.sql', '.db', 
+    '.pwd', '.secret', '.token', '.cred', '.cert'
+]
+
+# Ekstensi yang dapat dieksekusi
+EXECUTABLE_EXTENSIONS = [
+    '.sh', '.py', '.exe', '.bin', '.run', '.app', '.bat', 
+    '.cmd', '.ps1', '.bash'
+]
+
+# Izin default
+DEFAULT_PERMISSIONS = {
+    'file': 0o644,
+    'directory': 0o755,
+    'executable': 0o755,
+    'symlink': 0o777,
+    'private': 0o600
+}

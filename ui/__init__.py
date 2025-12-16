@@ -1,6 +1,6 @@
 """
-UI Module - FilePermissionChecker
-Modern widgets and dialogs
+Modul UI - FilePermissionChecker
+Widget modern dan dialog
 """
 
 from ui.modern_widgets import (
@@ -16,7 +16,7 @@ from ui.modern_widgets import (
 from ui.widget import StatusLabel, ColoredProgressBar, RiskTableWidgetItem as LegacyRiskItem
 
 __all__ = [
-    # Modern Widgets
+    # Widget Modern
     'GlassCard',
     'ModernButton',
     'AnimatedProgressBar',
@@ -26,7 +26,7 @@ __all__ = [
     'ToastNotification',
     'LoadingSpinner',
     
-    # Legacy Widgets
+    # Widget Warisan
     'StatusLabel',
     'ColoredProgressBar',
 ]

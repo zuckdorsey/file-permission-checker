@@ -1,6 +1,6 @@
 """
-Modern Dialogs for FilePermissionChecker
-Enhanced UI dengan glassmorphism dan animasi
+Dialog Modern untuk FilePermissionChecker
+Antarmuka yang ditingkatkan dengan glassmorphism dan animasi
 """
 
 from PyQt5.QtWidgets import (
@@ -14,7 +14,7 @@ from PyQt5.QtGui import QColor, QFont
 
 
 class ModernDialog(QDialog):
-    """Base class untuk modern dialogs"""
+    """Kelas dasar untuk dialog modern"""
     
     def __init__(self, parent=None, title="Dialog"):
         super().__init__(parent)
@@ -99,7 +99,7 @@ class ModernDialog(QDialog):
 
 
 class PasswordDialog(ModernDialog):
-    """Dialog untuk memasukkan password dengan modern UI"""
+    """Dialog untuk memasukkan password dengan antarmuka modern"""
     
     def __init__(self, parent=None, title="Enter Password"):
         super().__init__(parent, title)
@@ -189,7 +189,7 @@ class PasswordDialog(ModernDialog):
 
 
 class AdvancedPermissionDialog(ModernDialog):
-    """Dialog untuk mengubah hak akses dengan modern UI"""
+    """Dialog untuk mengubah hak akses dengan antarmuka modern"""
     
     def __init__(self, parent=None, file_count: int = 1):
         super().__init__(parent, "Advanced Permission Settings")
@@ -426,7 +426,7 @@ class AdvancedPermissionDialog(ModernDialog):
         self.update_visual_from_permission("644")
     
     def update_permission_from_visual(self):
-        """Update octal permission dari visual editor"""
+        """Perbarui izin oktal dari editor visual"""
         user = (4 if self.user_read.isChecked() else 0) + \
                (2 if self.user_write.isChecked() else 0) + \
                (1 if self.user_execute.isChecked() else 0)
@@ -450,7 +450,7 @@ class AdvancedPermissionDialog(ModernDialog):
         self.add_to_history(permission)
     
     def update_visual_from_permission(self, permission: str):
-        """Update visual editor dari octal permission"""
+        """Perbarui editor visual dari izin oktal"""
         if len(permission) != 3 or not permission.isdigit():
             return
         
@@ -486,13 +486,13 @@ class AdvancedPermissionDialog(ModernDialog):
                 checkbox.blockSignals(False)
     
     def set_permission(self, permission: str):
-        """Set permission dari preset"""
+        """Atur izin dari preset"""
         self.permission_input.setText(permission)
         self.update_visual_from_permission(permission)
         self.add_to_history(permission)
     
     def add_to_history(self, permission: str):
-        """Add permission ke history"""
+        """Tambahkan izin ke riwayat"""
         if self.permission_history and self.permission_history[-1] == permission:
             return
         
@@ -501,7 +501,7 @@ class AdvancedPermissionDialog(ModernDialog):
         self.current_history_index = len(self.permission_history) - 1
     
     def preview(self):
-        """Preview perubahan"""
+        """Pratinjau perubahan"""
         permission = self.permission_input.text()
         symbolic = self.get_symbolic_permission(permission)
         
@@ -527,7 +527,7 @@ class AdvancedPermissionDialog(ModernDialog):
         msg.exec_()
     
     def get_symbolic_permission(self, permission: str) -> str:
-        """Convert octal ke symbolic"""
+        """Konversi oktal ke simbolik"""
         if len(permission) != 3:
             return "Invalid"
         
@@ -541,7 +541,7 @@ class AdvancedPermissionDialog(ModernDialog):
         return symbolic
     
     def get_settings(self) -> dict:
-        """Dapatkan semua settings"""
+        """Dapatkan semua pengaturan"""
         return {
             'permission': self.permission_input.text(),
             'backup': self.backup_checkbox.isChecked(),
@@ -552,7 +552,7 @@ class AdvancedPermissionDialog(ModernDialog):
 
 
 class SettingsDialog(ModernDialog):
-    """Dialog untuk settings aplikasi"""
+    """Dialog untuk pengaturan aplikasi"""
     
     def __init__(self, parent=None):
         super().__init__(parent, "Settings")

@@ -1,6 +1,6 @@
 """
-Legacy Widgets - Enhanced with modern styling
-Maintains backward compatibility while adding new visual features
+Widget Warisan - Ditingkatkan dengan gaya modern
+Mempertahankan kompatibilitas mundur sambil menambahkan fitur visual baru
 """
 
 from PyQt5.QtWidgets import QLabel, QProgressBar, QTableWidgetItem
@@ -9,7 +9,7 @@ from PyQt5.QtGui import QColor, QFont
 
 
 class StatusLabel(QLabel):
-    """Custom status label dengan warna berbeda - ENHANCED"""
+    """Label status kustom dengan warna berbeda - DITINGKATKAN"""
     
     STATUS_STYLES = {
         'info': {
@@ -59,13 +59,13 @@ class StatusLabel(QLabel):
         """)
     
     def set_status(self, status: str):
-        """Change status and update style"""
+        """Ubah status dan perbarui gaya"""
         self.status = status
         self._apply_style()
 
 
 class ColoredProgressBar(QProgressBar):
-    """Progress bar dengan warna berdasarkan nilai - ENHANCED"""
+    """Progress bar dengan warna berdasarkan nilai - DITINGKATKAN"""
     
     def __init__(self):
         super().__init__()
@@ -126,7 +126,7 @@ class ColoredProgressBar(QProgressBar):
 
 
 class RiskTableWidgetItem(QTableWidgetItem):
-    """Table widget item dengan warna berdasarkan risk level - ENHANCED"""
+    """Item widget tabel dengan warna berdasarkan tingkat risiko - DITINGKATKAN"""
     
     RISK_COLORS = {
         'High': {
@@ -149,7 +149,7 @@ class RiskTableWidgetItem(QTableWidgetItem):
         self._apply_style()
     
     def _apply_style(self):
-        """Set warna berdasarkan risk level"""
+        """Atur warna berdasarkan tingkat risiko"""
         colors = self.RISK_COLORS.get(self.risk_level, self.RISK_COLORS['Low'])
         
         self.setBackground(colors['bg'])
@@ -161,13 +161,13 @@ class RiskTableWidgetItem(QTableWidgetItem):
         self.setFont(font)
     
     def set_risk_level(self, level: str):
-        """Update risk level"""
+        """Perbarui tingkat risiko"""
         self.risk_level = level
         self._apply_style()
 
 
 class InfoBadge(QLabel):
-    """Information badge widget"""
+    """Widget lencana informasi"""
     
     BADGE_TYPES = {
         'primary': '#667eea',
@@ -204,7 +204,7 @@ class InfoBadge(QLabel):
 
 
 class PermissionDisplay(QLabel):
-    """Widget untuk menampilkan permission dengan syntax highlighting"""
+    """Widget untuk menampilkan izin dengan penyorotan sintaks"""
     
     def __init__(self, octal: str = "644", parent=None):
         super().__init__(parent)
@@ -265,7 +265,7 @@ class PermissionDisplay(QLabel):
 
 
 class FileIcon(QLabel):
-    """File type icon widget"""
+    """Widget ikon tipe file"""
     
     ICONS = {
         'directory': '📁',

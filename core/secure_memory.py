@@ -1,6 +1,6 @@
 """
-Secure Memory Handler - CIA Confidentiality
-Handles sensitive data in memory securely
+Secure Memory Handler - CIA Confidentiality (Kerahasiaan CIA)
+Menangani data sensitif di memori secara aman
 """
 
 import ctypes
@@ -18,7 +18,7 @@ if platform.system() == 'Linux':
 
 
 class SecureString:
-    """String that clears itself from memory when destroyed"""
+    """String yang membersihkan dirinya sendiri dari memori saat dihancurkan"""
     
     def __init__(self, value: str):
         self._value = value
@@ -40,14 +40,14 @@ class SecureString:
         return self._value
     
     def clear(self):
-        """Securely clear memory"""
+        """Bersihkan memori secara aman"""
         if not self._cleared and hasattr(self, '_value'):
-            # Attempt to overwrite memory
-            # Note: Python strings are immutable so this is a best-effort
-            # For true security we'd need C-level buffers, but this helps 
-            # prevent casual memory dumps
+            # Mencoba menimpa memori
+            # Catatan: String Python tidak dapat diubah jadi ini adalah usaha terbaik
+            # Untuk keamanan sejati kita memerlukan buffer tingkat-C, tapi ini membantu
+            # mencegah dump memori kasual
             try:
-                # Force garbage collection hint
+                # Paksa petunjuk garbage collection
                 self._value = '0' * self._length
                 self._value = None
             except:
@@ -59,7 +59,7 @@ class SecureString:
 
 
 class SecureBuffer:
-    """Buffer for binary data that auto-clears"""
+    """Buffer untuk data biner yang membersihkan diri otomatis"""
     
     def __init__(self, data: bytes):
         self._buffer = bytearray(data)
@@ -75,15 +75,15 @@ class SecureBuffer:
         return bytes(self._buffer)
         
     def clear(self):
-        """Overwrite buffer with zeros"""
+        """Timpa buffer dengan nol"""
         for i in range(self._length):
             self._buffer[i] = 0
 
 
 def secure_delete_file(path: str, passes: int = 1) -> bool:
     """
-    Securely delete file by overwriting checks
-    CIA Confidentiality - Prevents data recovery
+    Hapus file secara aman dengan menimpa cek
+    CIA Confidentiality - Mencegah pemulihan data
     """
     if not os.path.exists(path):
         return False

@@ -1,6 +1,6 @@
 """
-Modern Widgets untuk FilePermissionChecker
-Custom widgets dengan glassmorphism dan animasi
+Widget Modern untuk FilePermissionChecker
+Widget kustom dengan glassmorphism dan animasi
 """
 
 from PyQt5.QtWidgets import (
@@ -19,7 +19,7 @@ from PyQt5.QtGui import (
 
 
 class GlassCard(QFrame):
-    """Container dengan glassmorphism effect"""
+    """Kontainer dengan efek glassmorphism"""
     
     def __init__(self, parent=None, blur_radius: int = 20):
         super().__init__(parent)
@@ -48,7 +48,7 @@ class GlassCard(QFrame):
 
 
 class ModernButton(QPushButton):
-    """Gradient button dengan hover animations"""
+    """Tombol gradien dengan animasi hover"""
     
     STYLES = {
         'primary': {
@@ -150,7 +150,7 @@ class ModernButton(QPushButton):
 
 
 class AnimatedProgressBar(QProgressBar):
-    """Progress bar dengan glow effect dan animasi"""
+    """Progress bar dengan efek cahaya dan animasi"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -206,7 +206,7 @@ class AnimatedProgressBar(QProgressBar):
 
 
 class PillBadge(QLabel):
-    """Risk level badges dengan pill style"""
+    """Lencana tingkat risiko dengan gaya pil"""
     
     RISK_STYLES = {
         'High': {
@@ -265,7 +265,7 @@ class PillBadge(QLabel):
 
 
 class ModernTableWidget(QTableWidget):
-    """Styled table dengan modern aesthetics"""
+    """Tabel bergaya dengan estetika modern"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -319,7 +319,7 @@ class ModernTableWidget(QTableWidget):
 
 
 class RiskTableWidgetItem(QTableWidgetItem):
-    """Table widget item dengan warna berdasarkan risk level - ENHANCED"""
+    """Item widget tabel dengan warna berdasarkan tingkat risiko - DITINGKATKAN"""
     
     COLORS = {
         'High': {
@@ -354,7 +354,7 @@ class RiskTableWidgetItem(QTableWidgetItem):
 
 
 class StatCard(GlassCard):
-    """Statistics card untuk dashboard"""
+    """Kartu statistik untuk dashboard"""
     
     def __init__(self, title: str, value: str = "0", 
                  icon: str = "📊", color: str = "#667eea", parent=None):
@@ -411,7 +411,7 @@ class StatCard(GlassCard):
 
 
 class ToastNotification(QFrame):
-    """Toast notification widget"""
+    """Widget notifikasi toast"""
     
     TYPES = {
         'success': {
@@ -497,7 +497,7 @@ class ToastNotification(QFrame):
 
 
 class LoadingSpinner(QWidget):
-    """Animated loading spinner"""
+    """Spinner pemuatan beranimasi"""
     
     def __init__(self, size: int = 40, parent=None):
         super().__init__(parent)
@@ -549,7 +549,7 @@ class LoadingSpinner(QWidget):
 
 
 class ModernLineEdit(QWidget):
-    """Modern styled line edit with floating label"""
+    """Line edit bergaya modern dengan label melayang"""
     
     def __init__(self, placeholder: str = "", parent=None):
         from PyQt5.QtWidgets import QLineEdit
