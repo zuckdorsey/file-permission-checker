@@ -1,6 +1,6 @@
 """
-Integrity Manager - CIA Principles for Permission Checker
-Handles audit logging, file integrity verification, and tamper detection
+Integrity Manager - Prinsip CIA untuk Pemeriksa Izin
+Menangani log audit, verifikasi integritas file, dan deteksi kerusakan
 """
 
 import os
@@ -11,7 +11,7 @@ from typing import Dict, Optional, List
 
 
 class IntegrityManager:
-    """CIA Integrity - Audit logging dan integrity verification"""
+    """CIA Integrity - Log audit dan verifikasi integritas"""
     
     def __init__(self, db_path: str = "scan_logs.db"):
         self.db_path = db_path
@@ -19,7 +19,7 @@ class IntegrityManager:
         self._secure_database()
     
     def _init_tables(self):
-        """Initialize audit tables"""
+        """Inisialisasi tabel audit"""
         try:
             conn = sqlite3.connect(self.db_path, timeout=10)
             cursor = conn.cursor()
@@ -64,12 +64,12 @@ class IntegrityManager:
             print(f"Failed to initialize tables: {e}")
     
     def _secure_database(self):
-        """CIA Confidentiality - Set secure permissions on database"""
+        """CIA Confidentiality - Atur izin aman pada database"""
         try:
             if os.path.exists(self.db_path):
-                os.chmod(self.db_path, 0o600)  # Owner read/write only
+                os.chmod(self.db_path, 0o600)  # Hanya pemilik baca/tulis
             
-            # Also secure WAL and SHM files if they exist
+            # Amankan juga file WAL dan SHM jika ada
             for ext in ['-wal', '-shm']:
                 wal_file = self.db_path + ext
                 if os.path.exists(wal_file):
@@ -81,7 +81,7 @@ class IntegrityManager:
     
     @staticmethod
     def calculate_sha256(filepath: str) -> Optional[str]:
-        """Calculate SHA256 hash of a file"""
+        """Hitung hash SHA256 dari file"""
         try:
             sha256_hash = hashlib.sha256()
             with open(filepath, 'rb') as f:
@@ -93,7 +93,7 @@ class IntegrityManager:
     
     @staticmethod
     def calculate_checksum(data: str) -> str:
-        """Calculate checksum for data string"""
+        """Hitung checksum untuk string data"""
         return hashlib.sha256(data.encode()).hexdigest()[:16]
     
     # ======================== AUDIT LOGGING ========================
@@ -101,13 +101,13 @@ class IntegrityManager:
     def log_audit_event(self, action_type: str, file_path: str = None,
                         details: str = None, severity: str = 'info') -> bool:
         """
-        CIA Integrity - Log audit event with checksum for tamper detection
+        CIA Integrity - Catat event audit dengan checksum untuk deteksi kerusakan
         """
         try:
             user = self._get_current_user()
             
-            # Create checksum for tamper detection (without timestamp - it changes format in DB)
-            # Use action + file_path + details + user as immutable data
+            # Buat checksum untuk deteksi kerusakan (tanpa timestamp - format di DB berubah)
+            # Gunakan action + file_path + details + user sebagai data immutable
             event_data = f"{action_type}|{file_path}|{details}|{user}"
             checksum = self.calculate_checksum(event_data)
             
@@ -130,7 +130,7 @@ class IntegrityManager:
             return False
     
     def _get_current_user(self) -> str:
-        """Get current user name"""
+        """Dapatkan nama user saat ini"""
         try:
             return os.getlogin()
         except:
@@ -143,12 +143,12 @@ class IntegrityManager:
     def get_audit_logs(self, limit: int = 100, 
                        action_type: str = None,
                        severity: str = None) -> List[Dict]:
-        """Retrieve audit logs"""
+        """Ambil log audit"""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
-            # Use explicit column selection to avoid schema mismatch
+            # Gunakan seleksi kolom eksplisit untuk menghindari ketidakcocokan skema
             query = '''SELECT id, timestamp, action_type, user, file_path,
                               details, checksum, severity, created_at 
                        FROM audit_logs'''
@@ -185,7 +185,7 @@ class IntegrityManager:
     # ======================== FILE INTEGRITY ========================
     
     def register_file_hash(self, filepath: str, permissions: str = None) -> bool:
-        """Register file hash for integrity monitoring"""
+        """Daftarkan hash file untuk pemantauan integritas"""
         try:
             if not os.path.exists(filepath):
                 return False
@@ -215,7 +215,7 @@ class IntegrityManager:
             return False
     
     def verify_file_integrity(self, filepath: str) -> Dict:
-        """Verify file hasn't been tampered with"""
+        """Verifikasi file belum dirusak"""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
@@ -233,7 +233,7 @@ class IntegrityManager:
             
             stored_hash, stored_perms, stored_size = row
             
-            # Calculate current hash
+            # Hitung hash saat ini
             current_hash = self.calculate_sha256(filepath)
             current_size = os.path.getsize(filepath) if os.path.exists(filepath) else 0
             
@@ -242,7 +242,7 @@ class IntegrityManager:
             
             is_valid = hash_match and size_match
             
-            # Log if integrity violation detected
+            # Log jika pelanggaran integritas terdeteksi
             if not is_valid:
                 self.log_audit_event(
                     action_type='integrity_violation',
@@ -264,12 +264,12 @@ class IntegrityManager:
     # ======================== DATABASE INTEGRITY ========================
     
     def verify_database_integrity(self) -> Dict:
-        """CIA Integrity - Verify database hasn't been corrupted"""
+        """CIA Integrity - Verifikasi database belum rusak"""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
-            # Run SQLite integrity check
+            # Jalankan pemeriksaan integritas SQLite
             cursor.execute('PRAGMA integrity_check')
             result = cursor.fetchone()[0]
             
@@ -293,7 +293,7 @@ class IntegrityManager:
             return {'is_valid': False, 'error': str(e)}
     
     def verify_audit_log_integrity(self) -> Dict:
-        """Verify audit logs haven't been tampered with"""
+        """Verifikasi log audit belum dirusak"""
         try:
             logs = self.get_audit_logs(limit=500)
             
@@ -322,8 +322,8 @@ class IntegrityManager:
                     else:
                         tampered_count += 1
             
-            # Integrity is valid if no recent logs were tampered
-            # Legacy logs are ignored (they used different checksum algorithm)
+            # Integritas valid jika tidak ada log baru yang dirusak
+            # Log lama diabaikan (menggunakan algoritma checksum berbeda)
             integrity_valid = tampered_count == 0
             
             return {
@@ -341,7 +341,7 @@ class IntegrityManager:
     
     @staticmethod
     def secure_file(filepath: str, permission: int = 0o600) -> bool:
-        """CIA Confidentiality - Set secure permissions on file"""
+        """CIA Confidentiality - Atur izin aman pada file"""
         try:
             os.chmod(filepath, permission)
             return True
@@ -350,7 +350,7 @@ class IntegrityManager:
     
     @staticmethod
     def create_checksum_file(filepath: str) -> Optional[str]:
-        """CIA Integrity - Create checksum file for verification"""
+        """CIA Integrity - Buat file checksum untuk verifikasi"""
         try:
             sha256_hash = hashlib.sha256()
             with open(filepath, 'rb') as f:
@@ -363,7 +363,7 @@ class IntegrityManager:
             with open(checksum_file, 'w') as f:
                 f.write(f"{checksum}  {os.path.basename(filepath)}\n")
             
-            # Secure the checksum file
+            # Amankan file checksum
             os.chmod(checksum_file, 0o600)
             
             return checksum_file
@@ -375,11 +375,11 @@ class IntegrityManager:
     # ======================== REPORTING ========================
     
     def get_cia_status(self) -> Dict:
-        """Get overall CIA compliance status"""
+        """Dapatkan status kepatuhan CIA menyeluruh"""
         db_integrity = self.verify_database_integrity()
         audit_integrity = self.verify_audit_log_integrity()
         
-        # Check database file permissions
+        # Cek izin file database
         db_secure = False
         try:
             mode = os.stat(self.db_path).st_mode & 0o777
