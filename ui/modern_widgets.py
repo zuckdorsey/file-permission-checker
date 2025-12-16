@@ -82,7 +82,7 @@ class ModernButton(QPushButton):
                  style: str = "primary", parent=None):
         super().__init__(text, parent)
         self.button_style = style
-        self._apply_style()
+        self.update_style()
         self._setup_animation()
         self._setup_shadow()
         
@@ -90,7 +90,9 @@ class ModernButton(QPushButton):
             self.setIcon(QIcon(icon))
             self.setIconSize(QSize(18, 18))
     
-    def _apply_style(self):
+    def update_style(self, style: str = None):
+        if style:
+            self.button_style = style
         style_config = self.STYLES.get(self.button_style, self.STYLES['primary'])
         grad = style_config['gradient']
         hover = style_config['hover']

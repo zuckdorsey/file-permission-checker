@@ -1,9 +1,3 @@
-/* ============================================
-   MODERN DARK THEME - GLASSMORPHISM STYLE
-   FilePermissionChecker v2.0
-   ============================================ */
-
-/* ==================== GLOBAL ==================== */
 * {
     font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;

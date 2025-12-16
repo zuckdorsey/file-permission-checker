@@ -4,57 +4,57 @@ from typing import List, Tuple, Dict
 from concurrent.futures import ThreadPoolExecutor
 
 class PermissionFixer:
-    """Class khusus untuk memperbaiki permissions"""
+    """Kelas khusus untuk memperbaiki izin file"""
     
     @staticmethod
     def fix_file_permission(filepath: str, new_mode: int, is_dir: bool = False) -> Tuple[bool, str]:
-        """Fix permission untuk single file/directory"""
+        """Perbaiki izin untuk satu file/direktori"""
         try:
             # Validasi mode
             if new_mode < 0 or new_mode > 0o777:
-                return False, "Invalid permission mode"
+                return False, "Mode izin tidak valid"
             
-            # Check if file exists
+            # Cek jika file ada
             if not os.path.exists(filepath):
                 return False, "File tidak ditemukan"
             
-            # Get current mode untuk logging
+            # Dapatkan mode saat ini untuk logging
             current_mode = os.stat(filepath).st_mode & 0o777
             
-            # Apply new permission
+            # Terapkan izin baru
             os.chmod(filepath, new_mode)
             
-            # Verify the change
+            # Verifikasi perubahan
             verify_mode = os.stat(filepath).st_mode & 0o777
             if verify_mode != new_mode:
-                return False, f"Failed to set permission (expected {oct(new_mode)}, got {oct(verify_mode)})"
+                return False, f"Gagal mengatur izin (diharapkan {oct(new_mode)}, didapat {oct(verify_mode)})"
             
-            return True, f"Changed from {oct(current_mode)} to {oct(new_mode)}"
+            return True, f"Berubah dari {oct(current_mode)} menjadi {oct(new_mode)}"
             
         except PermissionError:
-            return False, "Permission denied"
+            return False, "Izin ditolak"
         except Exception as e:
             return False, str(e)
     
     @staticmethod
     def determine_appropriate_permission(filepath: str) -> int:
-        """Tentukan permission yang appropriate berdasarkan file type"""
+        """Tentukan izin yang sesuai berdasarkan tipe file"""
         if os.path.isdir(filepath):
-            return 0o755  # Directory
+            return 0o755  # Direktori
         
         if os.path.islink(filepath):
             return 0o777  # Symlink
         
-        # Check if file is executable
+        # Cek jika file dapat dieksekusi
         if os.access(filepath, os.X_OK):
-            return 0o755  # Executable file
+            return 0o755  # File eksekusi
         
-        # Check file extension
+        # Cek ekstensi file
         executable_extensions = ['.sh', '.py', '.exe', '.bin', '.run', '.app']
         if any(filepath.endswith(ext) for ext in executable_extensions):
             return 0o755
         
-        # Check if file has executable bit set
+        # Cek jika file memiliki bit eksekusi diatur
         try:
             mode = os.stat(filepath).st_mode
             if mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
@@ -62,14 +62,38 @@ class PermissionFixer:
         except:
             pass
         
-        # Default for regular files
+        # Default untuk file reguler
         return 0o644
     
     @staticmethod
-    def batch_fix_permissions(filepaths: List[str], progress_callback=None) -> Dict:
-        """Fix permissions untuk batch files"""
+    def batch_fix_permissions(filepaths: List[str], progress_callback=None, 
+                            custom_mode: int = None, recursive: bool = False) -> Dict:
+        """
+        Perbaiki izin untuk banyak file sekaligus
+        Args:
+            filepaths: Daftar path yang akan diperbaiki
+            progress_callback: Callback untuk progress (0-100)
+            custom_mode: Mode spesifik opsional (misal 0o755). Jika None, deteksi otomatis.
+            recursive: Terapkan secara rekursif untuk direktori
+        """
+        # Expand direktori jika rekursif
+        all_paths = []
+        if recursive:
+            for path in filepaths:
+                if os.path.exists(path):
+                    all_paths.append(path)
+                    if os.path.isdir(path):
+                        for root, dirs, files in os.walk(path):
+                            for d in dirs: all_paths.append(os.path.join(root, d))
+                            for f in files: all_paths.append(os.path.join(root, f))
+        else:
+            all_paths = filepaths
+
+        # Hapus duplikat
+        all_paths = list(set(all_paths))
+
         results = {
-            'total': len(filepaths),
+            'total': len(all_paths),
             'success': 0,
             'failed': 0,
             'errors': [],
@@ -78,12 +102,20 @@ class PermissionFixer:
         
         with ThreadPoolExecutor(max_workers=4) as executor:
             futures = []
-            for filepath in filepaths:
+            for filepath in all_paths:
                 if not os.path.exists(filepath):
                     continue
                 
-                # Determine appropriate permission
-                new_mode = PermissionFixer.determine_appropriate_permission(filepath)
+                # Tentukan mode
+                if custom_mode is not None:
+                    # Jika direktori dan rekursif, pastikan execute bit untuk traversal
+                    if os.path.isdir(filepath) and (custom_mode & 0o400):
+                        new_mode = custom_mode | 0o100 # Pastikan owner exec jika owner read
+                    else:
+                        new_mode = custom_mode
+                else:
+                    new_mode = PermissionFixer.determine_appropriate_permission(filepath)
+                
                 is_dir = os.path.isdir(filepath)
                 
                 future = executor.submit(
