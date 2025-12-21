@@ -1,21 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
-"""
-FilePermissionChecker v2.0 - Pemeriksa Izin File
-Alat Keamanan Izin File Tingkat Lanjut
-Fokus pada: Pemindaian, Analisis, Perbaikan Izin, Enkripsi, dan Pencadangan
-"""
-
 import sys
 import os
 import json
@@ -64,16 +46,13 @@ class FilePermissionChecker(QMainWindow):
         self.scan_cache = {}
         self.dark_mode = True
         
-        # Core components
         self.permission_fixer = PermissionFixer()
         self.integrity_manager = IntegrityManager()
         self.backup_manager = BackupManager()
         self.security_manager = SecurityManager()
         
-        # Database
         self.db_conn = init_database()
         
-        # Initialize UI
         self.init_ui()
         self.setup_shortcuts()
         self.load_stylesheet()
@@ -98,55 +77,48 @@ class FilePermissionChecker(QMainWindow):
         self.setGeometry(100, 100, 1400, 850)
         self.setMinimumSize(1100, 650)
         
-        # Central widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # Header bar
         self.init_header()
         main_layout.addWidget(self.header_widget)
         
-        # Content area (Sidebar + Tabs)
         content_widget = QWidget()
         content_layout = QHBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
         content_layout.setSpacing(20)
         
-        # Sidebar with stats
         self.init_sidebar()
         content_layout.addWidget(self.sidebar, 0)
         
-        # Main Tab Widget
         self.tabs = QTabWidget()
         self.tabs.setStyleSheet("""
             QTabWidget::pane {
-                border: 1px solid rgba(102, 126, 234, 0.2);
-                border-radius: 10px;
-                background: rgba(15, 15, 26, 0.6);
+                border: 1px solid
+                border-radius: 6px;
+                background:
             }
             QTabBar::tab {
-                background: rgba(15, 15, 26, 0.4);
-                color: #94a3b8;
+                background: transparent;
+                color:
                 padding: 10px 20px;
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
-                margin-right: 2px;
-                font-weight: 600;
+                border: none;
+                border-bottom: 2px solid transparent;
+                margin-right: 4px;
+                font-weight: 500;
             }
             QTabBar::tab:selected {
-                background: rgba(102, 126, 234, 0.2);
-                color: #ffffff;
-                border-bottom: 2px solid #667eea;
+                color:
+                border-bottom: 2px solid
             }
-            QTabBar::tab:hover {
-                background: rgba(102, 126, 234, 0.1);
+            QTabBar::tab:hover:!selected {
+                color:
             }
         """)
         
-        # Initialize tabs
         self.init_scanner_tab()
         self.init_encryption_tab()
         self.init_backup_tab()
@@ -154,31 +126,28 @@ class FilePermissionChecker(QMainWindow):
         content_layout.addWidget(self.tabs, 1)
         main_layout.addWidget(content_widget, 1)
         
-        # Status bar
         self.init_status_bar()
     
     def init_header(self):
-        """Inisialisasi bilah header"""
+        """Inisialisasi bilah header - minimalist design"""
         self.header_widget = QFrame()
         self.header_widget.setObjectName("headerBar")
         self.header_widget.setStyleSheet("""
-            QFrame#headerBar {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 rgba(102, 126, 234, 0.15), stop:1 rgba(118, 75, 162, 0.15));
-                border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+            QFrame
+                background:
+                border-bottom: 1px solid
             }
         """)
-        self.header_widget.setFixedHeight(70)
+        self.header_widget.setFixedHeight(60)
         
         header_layout = QHBoxLayout(self.header_widget)
-        header_layout.setContentsMargins(25, 10, 25, 10)
+        header_layout.setContentsMargins(24, 0, 24, 0)
         
-        # Logo/Title
         title_layout = QVBoxLayout()
         title_label = QLabel("File Permission Checker")
-        title_label.setStyleSheet("font-size: 22px; font-weight: 700; color: #ffffff;")
+        title_label.setStyleSheet("font-size: 16px; font-weight: 600; color: #e5e5e5;")
         subtitle_label = QLabel("Scan • Encrypt • Backup")
-        subtitle_label.setStyleSheet("font-size: 12px; color: #94a3b8;")
+        subtitle_label.setStyleSheet("font-size: 11px; color: #525252;")
         title_layout.addWidget(title_label)
         title_layout.addWidget(subtitle_label)
         title_layout.setSpacing(2)
@@ -186,136 +155,86 @@ class FilePermissionChecker(QMainWindow):
         
         header_layout.addStretch()
         
-        # Quick actions
-        scan_btn = ModernButton("🔍 Scan", style="primary")
+        scan_btn = ModernButton("Scan", style="primary")
         scan_btn.clicked.connect(lambda: self.tabs.setCurrentIndex(0) or self.start_scan())
         header_layout.addWidget(scan_btn)
         
-        fix_btn = ModernButton("🔧 Fix Risky", style="warning")
+        fix_btn = ModernButton("Fix Risky", style="warning")
         fix_btn.clicked.connect(self.fix_permissions)
         header_layout.addWidget(fix_btn)
         
-        # Export menu
-        export_csv_btn = ModernButton("📊 CSV", style="secondary")
+        export_csv_btn = ModernButton("Export CSV", style="secondary")
         export_csv_btn.clicked.connect(lambda: self.export_results('csv'))
         header_layout.addWidget(export_csv_btn)
     
     def init_sidebar(self):
         """Inisialisasi sidebar dengan statistik"""
         self.sidebar = GlassCard()
-        self.sidebar.setFixedWidth(260)
+        self.sidebar.setFixedWidth(240)
         
         sidebar_layout = QVBoxLayout(self.sidebar)
-        sidebar_layout.setContentsMargins(15, 20, 15, 20)
-        sidebar_layout.setSpacing(15)
+        sidebar_layout.setContentsMargins(16, 20, 16, 20)
+        sidebar_layout.setSpacing(12)
         
-        # Stats title
-        stats_title = QLabel("📊 Statistics")
-        stats_title.setStyleSheet("font-size: 16px; font-weight: 700; color: #ffffff; margin-bottom: 10px;")
+        stats_title = QLabel("Statistics")
+        stats_title.setStyleSheet("font-size: 14px; font-weight: 600; color: #e5e5e5; margin-bottom: 8px;")
         sidebar_layout.addWidget(stats_title)
         
-        # Stat cards
-        self.stat_total = self._create_stat_item("📁", "Total Files", "0", "#667eea")
+        self.stat_total = self._create_stat_item("Total Files", "0", "#a3a3a3")
         sidebar_layout.addWidget(self.stat_total)
         
-        self.stat_safe = self._create_stat_item("✅", "Safe (Low Risk)", "0", "#10b981")
+        self.stat_safe = self._create_stat_item("Low Risk", "0", "#4ade80")
         sidebar_layout.addWidget(self.stat_safe)
         
-        self.stat_medium = self._create_stat_item("⚠️", "Medium Risk", "0", "#f59e0b")
+        self.stat_medium = self._create_stat_item("Medium Risk", "0", "#fbbf24")
         sidebar_layout.addWidget(self.stat_medium)
         
-        self.stat_high = self._create_stat_item("🔴", "High Risk", "0", "#ef4444")
+        self.stat_high = self._create_stat_item("High Risk", "0", "#f87171")
         sidebar_layout.addWidget(self.stat_high)
         
-        sidebar_layout.addSpacing(15)
+        sidebar_layout.addSpacing(12)
         
-        # Size info
-        self.stat_size = self._create_stat_item("💾", "Total Size", "0 B", "#8b5cf6")
+        self.stat_size = self._create_stat_item("Total Size", "0 B", "#a3a3a3")
         sidebar_layout.addWidget(self.stat_size)
-        
-        sidebar_layout.addSpacing(15)
-        
-        # CIA Status Section
-        cia_title = QLabel("🛡️ CIA Triad Status")
-        cia_title.setStyleSheet("font-size: 13px; font-weight: 600; color: #ffffff;")
-        sidebar_layout.addWidget(cia_title)
-        
-        # CIA Status items
-        self.cia_confidentiality = QLabel("🔒 Confidentiality: ✅")
-        self.cia_confidentiality.setStyleSheet("color: #10b981; font-size: 11px;")
-        sidebar_layout.addWidget(self.cia_confidentiality)
-        
-        self.cia_integrity = QLabel("✅ Integrity: ✅")
-        self.cia_integrity.setStyleSheet("color: #10b981; font-size: 11px;")
-        sidebar_layout.addWidget(self.cia_integrity)
-        
-        self.cia_availability = QLabel("🌐 Availability: ✅")
-        self.cia_availability.setStyleSheet("color: #10b981; font-size: 11px;")
-        sidebar_layout.addWidget(self.cia_availability)
-        
-        # Check CIA button
-        cia_check_btn = QPushButton("🔍 Check CIA Status")
-        cia_check_btn.setStyleSheet("""
-            QPushButton {
-                background: rgba(102, 126, 234, 0.2);
-                border: 1px solid rgba(102, 126, 234, 0.4);
-                border-radius: 6px;
-                padding: 8px;
-                color: #667eea;
-                font-size: 11px;
-                font-weight: 600;
-            }
-            QPushButton:hover {
-                background: rgba(102, 126, 234, 0.3);
-            }
-        """)
-        cia_check_btn.clicked.connect(self.check_cia_status)
-        sidebar_layout.addWidget(cia_check_btn)
         
         sidebar_layout.addStretch()
         
-        # Version info
-        version_label = QLabel("Made with ❤️ by Human")
-        version_label.setStyleSheet("color: #64748b; font-size: 10px; text-align: center;")
+        version_label = QLabel("v2.0")
+        version_label.setStyleSheet("color: #525252; font-size: 11px; text-align: center;")
         version_label.setAlignment(Qt.AlignCenter)
         sidebar_layout.addWidget(version_label)
     
-    def _create_stat_item(self, icon: str, title: str, value: str, color: str) -> QFrame:
-        """Buat widget statistik mini"""
+    def _create_stat_item(self, title: str, value: str, color: str) -> QFrame:
+        """Buat widget statistik mini - minimalist design"""
         frame = QFrame()
-        frame.setStyleSheet(f"""
-            QFrame {{
-                background: rgba(15, 15, 26, 0.5);
-                border: 1px solid rgba(102, 126, 234, 0.2);
-                border-radius: 10px;
-            }}
+        frame.setStyleSheet("""
+            QFrame {
+                background:
+                border: 1px solid
+                border-radius: 6px;
+            }
         """)
         
         layout = QHBoxLayout(frame)
         layout.setContentsMargins(12, 10, 12, 10)
         
-        icon_label = QLabel(icon)
-        icon_label.setStyleSheet("font-size: 20px;")
-        layout.addWidget(icon_label)
-        
         text_layout = QVBoxLayout()
         text_layout.setSpacing(2)
         
+        title_label = QLabel(title)
+        title_label.setStyleSheet("font-size: 11px; color: #737373; font-weight: 500;")
+        text_layout.addWidget(title_label)
+        
         value_label = QLabel(value)
         value_label.setObjectName(f"value_{title.lower().replace(' ', '_').replace('(', '').replace(')', '')}")
-        value_label.setStyleSheet(f"font-size: 16px; font-weight: 700; color: {color};")
+        value_label.setStyleSheet(f"font-size: 18px; font-weight: 600; color: {color};")
         text_layout.addWidget(value_label)
-        
-        title_label = QLabel(title)
-        title_label.setStyleSheet("font-size: 10px; color: #94a3b8;")
-        text_layout.addWidget(title_label)
         
         layout.addLayout(text_layout)
         layout.addStretch()
         
         return frame
     
-    # ======================== SCANNER TAB ========================
     
     def init_scanner_tab(self):
         """Inisialisasi Tab Pemindai"""
@@ -323,7 +242,6 @@ class FilePermissionChecker(QMainWindow):
         scan_layout = QVBoxLayout(scan_tab)
         scan_layout.setContentsMargins(5, 5, 5, 5)
         
-        # Top panel - Path input
         top_card = GlassCard()
         top_layout = QHBoxLayout(top_card)
         top_layout.setContentsMargins(20, 15, 20, 15)
@@ -348,13 +266,11 @@ class FilePermissionChecker(QMainWindow):
         
         scan_layout.addWidget(top_card)
         
-        # Progress bar
         self.progress_bar = AnimatedProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setFixedHeight(26)
         scan_layout.addWidget(self.progress_bar)
         
-        # File table
         self.file_table = ModernTableWidget()
         self.file_table.setColumnCount(8)
         self.file_table.setHorizontalHeaderLabels([
@@ -367,7 +283,6 @@ class FilePermissionChecker(QMainWindow):
         self.file_table.itemSelectionChanged.connect(self.update_selection_count)
         scan_layout.addWidget(self.file_table, 1)
         
-        # Bottom panel - Filters and actions
         bottom_card = GlassCard()
         bottom_layout = QHBoxLayout(bottom_card)
         bottom_layout.setContentsMargins(20, 12, 20, 12)
@@ -410,7 +325,6 @@ class FilePermissionChecker(QMainWindow):
         
         self.tabs.addTab(scan_tab, "🔍 Permission Scanner")
     
-    # ======================== ENCRYPTION TAB ========================
     
     def init_encryption_tab(self):
         """Inisialisasi Tab Enkripsi"""
@@ -418,11 +332,9 @@ class FilePermissionChecker(QMainWindow):
         layout = QVBoxLayout(enc_tab)
         layout.setContentsMargins(5, 5, 5, 5)
         
-        # Controls
         ctrl_card = GlassCard()
         ctrl_layout = QVBoxLayout(ctrl_card)
         
-        # Mode selection
         mode_layout = QHBoxLayout()
         self.enc_mode_btn = ModernButton("🔒 Encrypt Files", style="primary")
         self.enc_mode_btn.setCheckable(True)
@@ -440,7 +352,6 @@ class FilePermissionChecker(QMainWindow):
         
         ctrl_layout.addSpacing(10)
         
-        # Password input
         pass_layout = QHBoxLayout()
         pass_label = QLabel("🔑 Password:")
         pass_label.setStyleSheet("font-weight: 600;")
@@ -454,7 +365,6 @@ class FilePermissionChecker(QMainWindow):
         
         layout.addWidget(ctrl_card)
         
-        # File list
         list_card = GlassCard()
         list_layout = QVBoxLayout(list_card)
         list_label = QLabel("📄 Files to Process:")
@@ -465,7 +375,6 @@ class FilePermissionChecker(QMainWindow):
         self.enc_file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         list_layout.addWidget(self.enc_file_list)
         
-        # Actions
         action_layout = QHBoxLayout()
         add_file_btn = ModernButton("➕ Add Files", style="secondary")
         add_file_btn.clicked.connect(self.enc_add_files)
@@ -484,7 +393,6 @@ class FilePermissionChecker(QMainWindow):
         list_layout.addLayout(action_layout)
         layout.addWidget(list_card, 1)
         
-        # Progress
         self.enc_progress = AnimatedProgressBar()
         self.enc_progress.setVisible(False)
         layout.addWidget(self.enc_progress)
@@ -534,7 +442,6 @@ class FilePermissionChecker(QMainWindow):
         self.enc_worker.finished.connect(lambda: self.enc_progress.setVisible(False))
         thread.start()
         
-    # ======================== BACKUP TAB ========================
     
     def init_backup_tab(self):
         """Inisialisasi Tab Pencadangan"""
@@ -542,7 +449,6 @@ class FilePermissionChecker(QMainWindow):
         layout = QVBoxLayout(backup_tab)
         layout.setContentsMargins(5, 5, 5, 5)
         
-        # New Backup
         new_card = GlassCard()
         new_layout = QVBoxLayout(new_card)
         new_label = QLabel("📦 Create New Backup")
@@ -565,7 +471,6 @@ class FilePermissionChecker(QMainWindow):
         new_layout.addLayout(form_layout)
         layout.addWidget(new_card)
         
-        # Backup History
         hist_card = GlassCard()
         hist_layout = QVBoxLayout(hist_card)
         hist_label = QLabel("🕰️ Backup History")
@@ -578,7 +483,6 @@ class FilePermissionChecker(QMainWindow):
         self.backup_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         hist_layout.addWidget(self.backup_table)
         
-        # Actions
         actions = QHBoxLayout()
         refresh_btn = ModernButton("🔄 Refresh List", style="secondary")
         refresh_btn.clicked.connect(self.refresh_backups)
@@ -593,7 +497,6 @@ class FilePermissionChecker(QMainWindow):
         
         self.tabs.addTab(backup_tab, "💾 Backups")
         
-        # Load initial data
         self.refresh_backups()
     
     def backup_browse(self):
@@ -632,7 +535,6 @@ class FilePermissionChecker(QMainWindow):
             self.backup_table.setItem(row, 1, QTableWidgetItem(b['created'].strftime('%Y-%m-%d %H:%M')))
             self.backup_table.setItem(row, 2, QTableWidgetItem(format_size(b['size'])))
             self.backup_table.setItem(row, 3, QTableWidgetItem(str(b['file_count'])))
-            # Store path in user role
             self.backup_table.item(row, 0).setData(Qt.UserRole, b['path'])
             
     def restore_backup(self):
@@ -650,7 +552,6 @@ class FilePermissionChecker(QMainWindow):
             else:
                 self.show_toast(f"Restore failed: {res.get('error')}", "error")
 
-    # ======================== SHARED UTILITIES ========================
     
     def init_status_bar(self):
         """Inisialisasi bilah status"""
@@ -666,7 +567,7 @@ class FilePermissionChecker(QMainWindow):
         for url in event.mimeData().urls():
             path = url.toLocalFile()
             if os.path.isdir(path):
-                self.tabs.setCurrentIndex(0)  # Switch to scan tab
+                self.tabs.setCurrentIndex(0)
                 self.path_input.setText(path)
                 self.start_scan()
                 break
@@ -690,9 +591,7 @@ class FilePermissionChecker(QMainWindow):
         QShortcut(QKeySequence("Ctrl+E"), self, lambda: self.export_results('csv'))
         QShortcut(QKeySequence("F5"), self, lambda: self.start_scan() if self.tabs.currentIndex() == 0 else self.refresh_backups())
     
-    # ... (Include existing scanner/fixer methods: start_scan, update_scan_progress, add_file_to_table, scan_finished, update_stats, scan_error, display_scan_results, apply_filter, get_selected_files, update_selection_count, fix_permissions, fix_selected_permissions, _apply_fixes, export_results, _export_csv, _export_json, _create_checksum)
     
-    # Placeholder for brevity - implementing them below
     def start_scan(self):
         """Mulai memindai folder"""
         folderpath = self.path_input.text().strip()
@@ -705,7 +604,6 @@ class FilePermissionChecker(QMainWindow):
         
         self.integrity_manager.log_audit_event('scan_started', file_path=folderpath, details=f"Scan initiated for folder: {folderpath}")
         
-        # Clear previous
         self.all_files = []
         self.file_table.setRowCount(0)
         self.progress_bar.setVisible(True)
@@ -790,7 +688,6 @@ class FilePermissionChecker(QMainWindow):
             self.show_toast("No risky permissions found! ✅", "success")
             return
         
-        # Tanyakan Perbaikan Cepat atau Lanjutan
         msg = QMessageBox(self)
         msg.setWindowTitle('Fix Risky Permissions')
         msg.setText(f"Found {len(risky_files)} files with risky permissions.")
@@ -835,12 +732,10 @@ class FilePermissionChecker(QMainWindow):
         custom_mode = int(settings['permission'], 8) if settings else None
         recursive = settings.get('recursive', False) if settings else False
         
-        # 1. Buat backup jika diminta
         if settings and settings.get('backup'):
             self.status_bar.showMessage("📦 Creating backup before changes...")
             self.backup_manager.create_backup(filepaths, "Backup before permission fix")
         
-        # 2. Perbaiki izin
         self.status_bar.showMessage("🔧 Fixing permissions...")
         results = self.permission_fixer.batch_fix_permissions(
             filepaths,
@@ -848,7 +743,6 @@ class FilePermissionChecker(QMainWindow):
             recursive=recursive
         )
         
-        # Catat audit
         audit_details = f"Fixed {results['success']} files"
         if custom_mode:
             audit_details += f" (Mode: {oct(custom_mode)})"
@@ -860,21 +754,13 @@ class FilePermissionChecker(QMainWindow):
             details=audit_details
         )
         
-        # 3. Enkripsi jika diminta
         if settings and settings.get('encrypt'):
             self.status_bar.showMessage("🔒 Encrypting files...")
-            # Kita butuh pemeriksaan di sini - biasanya kita tidak mengenkripsi file sistem secara acak
-            # Tapi pengguna memintanya. Kita akan gunakan default atau minta password?
-            # EncryptionWorker membutuhkan password. Kita tidak bisa melakukannya secara diam-diam tanpa password.
-            # Untuk saat ini, tampilkan peringatan atau lewati jika tidak ada konteks password.
-            # Idealnya AdvancedPermissionDialog harus meminta password jika Enkripsi dicentang.
-            # Atau kita buka tab enkripsi.
             self.show_toast("Please use Encryption Tab for secure encryption", "info")
             
         self.show_toast(f"Fixed {results['success']} files", "success")
         self.status_bar.showMessage(f"✅ Fixed {results['success']} files • {results['failed']} failed")
         
-        # Pindai ulang
         QTimer.singleShot(500, self.start_scan)
 
     def export_results(self, format_type: str):
@@ -907,7 +793,6 @@ class FilePermissionChecker(QMainWindow):
                 'total_files': len(self.all_files)
             }
             
-            # Serialize dates
             def json_serial(obj):
                 if isinstance(obj, (datetime, date)):
                     return obj.isoformat()
@@ -942,7 +827,6 @@ class FilePermissionChecker(QMainWindow):
         self.status_bar.showMessage("🛡️ Checking CIA status...")
         cia_status = self.integrity_manager.get_cia_status()
         
-        # Update labels
         conf = cia_status['confidentiality']
         self.cia_confidentiality.setText(f"🔒 Confidentiality: {'✅ Secure' if conf['database_secured'] else '⚠️ Check DB'}")
         self.cia_confidentiality.setStyleSheet(f"color: {'#10b981' if conf['database_secured'] else '#f59e0b'}; font-size: 11px;")

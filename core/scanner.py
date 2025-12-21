@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 import os
 import stat
 from datetime import datetime
@@ -155,19 +143,83 @@ class ScanThread(QThread):
             return None
     
     def _determine_risk_level(self, mode: str, filepath: str, is_symlink: bool) -> str:
+        """
+        Determine risk level based on FILE SENSITIVITY (not permission danger).
+        
+        Risk Level indicates how sensitive the file is:
+        - High Risk: Sensitive files that REQUIRE strict permissions (600, 700, 400, 500)
+        - Medium Risk: Moderately sensitive files that need balanced permissions (640, 644, 755, 750)
+        - Low Risk: Non-sensitive files that can have open permissions (666, 777, 664, 757)
+        """
+        filename = os.path.basename(filepath).lower()
+        
+        high_risk_extensions = [
+            '.env', '.key', '.pem', '.crt', '.p12', '.pfx',
+            '.pwd', '.password', '.secret', '.token',
+            '.credentials', '.auth',
+        ]
+        
+        high_risk_patterns = [
+            'id_rsa', 'id_dsa', 'id_ecdsa', 'id_ed25519',
+            'authorized_keys', 'known_hosts',
+            '.htpasswd', '.htaccess',
+            'shadow', 'passwd', 'sudoers',
+            'master.key', 'credentials.yml',
+            'secrets.yaml', 'secrets.json',
+            'wp-config.php',
+            '.netrc', '.pgpass',
+        ]
+        
+        high_risk_dirs = ['.ssh', '.gnupg', 'private', 'secrets', 'credentials']
+        
+        if any(filepath.lower().endswith(ext) for ext in high_risk_extensions):
+            return 'High'
+        
+        if any(pattern in filename for pattern in high_risk_patterns):
+            return 'High'
+        
+        if any(f'/{dir_name}/' in filepath.lower() or filepath.lower().endswith(f'/{dir_name}') 
+               for dir_name in high_risk_dirs):
+            return 'High'
+        
+        medium_risk_extensions = [
+            '.conf', '.config', '.cfg', '.ini', '.yaml', '.yml',
+            '.xml', '.properties',
+            '.sql', '.db', '.sqlite', '.sqlite3',
+            '.log',
+            '.sh', '.bash', '.zsh', '.py', '.rb', '.pl',
+        ]
+        
+        medium_risk_patterns = [
+            'config', 'settings', 'database',
+            'nginx', 'apache', 'httpd',
+            'docker-compose', 'dockerfile',
+            'makefile', 'rakefile',
+        ]
+        
         if is_symlink:
             return 'Medium'
         
-        if mode in ['777', '666', '767', '676']:
-            return 'High'
-        
-        if mode[1] in ['6', '7'] or mode[2] in ['6', '7']:
-            sensitive_extensions = ['.env', '.key', '.pem', '.conf', '.ini', '.sql', '.db', '.pwd']
-            if any(filepath.endswith(ext) for ext in sensitive_extensions):
-                return 'High'
+        if any(filepath.lower().endswith(ext) for ext in medium_risk_extensions):
             return 'Medium'
         
-        return 'Low'
+        if any(pattern in filename for pattern in medium_risk_patterns):
+            return 'Medium'
+        
+        low_risk_extensions = [
+            '.html', '.css', '.js', '.json',
+            '.md', '.txt', '.rst', '.doc',
+            '.png', '.jpg', '.jpeg', '.gif', '.svg',
+            '.ico', '.webp', '.bmp',
+            '.pdf', '.csv',
+            '.woff', '.woff2', '.ttf', '.eot',
+            '.mp3', '.mp4', '.wav', '.avi',
+        ]
+        
+        if any(filepath.lower().endswith(ext) for ext in low_risk_extensions):
+            return 'Low'
+        
+        return 'Medium'
     
     def _check_custom_rules(self, filepath: str) -> Optional[str]:
         filename = os.path.basename(filepath)

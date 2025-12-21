@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 import sys
 import os
 from pathlib import Path
@@ -24,56 +12,68 @@ sys.path.insert(0, str(project_root))
 from ui.main_window import FilePermissionChecker
 
 class ModernSplashScreen(QSplashScreen):
+    """Minimalist splash screen with loading animation"""
+    
     def __init__(self):
-        pixmap = QPixmap(550, 350)
+        pixmap = QPixmap(480, 320)
         pixmap.fill(Qt.transparent)
 
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        gradient = QLinearGradient(0, 0, 550, 350)
-        gradient.setColorAt(0, QColor(15, 15, 26))
-        gradient.setColorAt(0.5, QColor(26, 26, 46))
-        gradient.setColorAt(1, QColor(22, 33, 62))
-
-        painter.setBrush(gradient)
+        painter.setBrush(QColor(13, 13, 13))
         painter.setPen(Qt.NoPen)
-        painter.drawRoundedRect(0, 0, 550, 350, 20, 20)
+        painter.drawRoundedRect(0, 0, 480, 320, 12, 12)
 
-        gradient2 = QLinearGradient(0, 0, 550, 0)
-        gradient2.setColorAt(0, QColor(102, 126, 234, 80))
-        gradient2.setColorAt(1, QColor(118, 75, 162, 80))
+        painter.setPen(QColor(31, 31, 31))
+        painter.setBrush(Qt.NoBrush)
+        painter.drawRoundedRect(1, 1, 478, 318, 12, 12)
 
-        painter.setBrush(gradient2)
-        painter.drawEllipse(380, -80, 250, 250)
-        painter.drawEllipse(-80, 200, 200, 200)
-
-        painter.setPen(QColor(255, 255, 255))
-
-        title_font = QFont('Segoe UI', 26, QFont.Bold)
+        painter.setPen(QColor(229, 229, 229))
+        title_font = QFont('Inter', 22, QFont.DemiBold)
+        if not title_font.exactMatch():
+            title_font = QFont('Segoe UI', 22, QFont.DemiBold)
         painter.setFont(title_font)
-        painter.drawText(0, 120, 550, 45, Qt.AlignCenter, " File Permission Checker")
+        painter.drawText(0, 110, 480, 40, Qt.AlignCenter, "File Permission Checker")
 
-        subtitle_font = QFont('Segoe UI', 13)
+        subtitle_font = QFont('Inter', 12)
+        if not subtitle_font.exactMatch():
+            subtitle_font = QFont('Segoe UI', 12)
         painter.setFont(subtitle_font)
-        painter.setPen(QColor(148, 163, 184))
-        painter.drawText(0, 170, 550, 25, Qt.AlignCenter, "Scan • Analyze • Fix Permissions")
+        painter.setPen(QColor(115, 115, 115))
+        painter.drawText(0, 155, 480, 24, Qt.AlignCenter, "Scan • Analyze • Secure")
 
-        version_font = QFont('Segoe UI', 10)
+        version_font = QFont('Inter', 10)
+        if not version_font.exactMatch():
+            version_font = QFont('Segoe UI', 10)
         painter.setFont(version_font)
-        painter.setPen(QColor(102, 126, 234))
-        painter.drawText(0, 210, 550, 20, Qt.AlignCenter, "v2.0.0")
+        painter.setPen(QColor(82, 82, 82))
+        painter.drawText(0, 190, 480, 20, Qt.AlignCenter, "v2.0")
+
+        painter.setBrush(QColor(26, 26, 26))
+        painter.setPen(Qt.NoPen)
+        painter.drawRoundedRect(140, 240, 200, 4, 2, 2)
 
         painter.end()
 
         super().__init__(pixmap)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        
+        self._progress = 0
+        self._loading_steps = [
+            "Initializing...",
+            "Loading modules...",
+            "Preparing database...",
+            "Setting up security...",
+            "Loading interface...",
+            "Almost ready..."
+        ]
 
     def showMessage(self, message: str):
         super().showMessage(
-            f"  {message}",
+            message,
             Qt.AlignBottom | Qt.AlignHCenter,
-            QColor(148, 163, 184)
+            QColor(115, 115, 115)
         )
 
 def load_styles(app: QApplication):
@@ -84,19 +84,18 @@ def load_styles(app: QApplication):
             app.setStyleSheet(f.read())
     else:
         app.setStyleSheet("""
-            QMainWindow { background-color: #1a1a2e; }
-            QWidget { color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+            QMainWindow { background-color:
+            QWidget { color:
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 
-#764ba2);
-
-                border: none; border-radius: 8px; padding: 10px 20px;
-                color: white; font-weight: 600;
+                background:
+                border: 1px solid
+                border-radius: 6px;
+                padding: 10px 20px;
+                color:
+                font-weight: 500;
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 
-#8b5fbf);
-
+                background:
             }
         """)
 
@@ -113,17 +112,37 @@ def main():
     splash.show()
     app.processEvents()
 
+    import time
+    
+    splash.showMessage("Initializing...")
+    app.processEvents()
+    time.sleep(0.4)
+    
     splash.showMessage("Loading modules...")
     app.processEvents()
+    time.sleep(0.3)
 
     load_styles(app)
-
-    splash.showMessage("Initializing interface...")
+    
+    splash.showMessage("Preparing database...")
     app.processEvents()
+    time.sleep(0.3)
+    
+    splash.showMessage("Setting up security...")
+    app.processEvents()
+    time.sleep(0.3)
+
+    splash.showMessage("Loading interface...")
+    app.processEvents()
+    time.sleep(0.4)
 
     window = FilePermissionChecker()
+    
+    splash.showMessage("Ready!")
+    app.processEvents()
+    time.sleep(0.3)
+    
     window.show()
-
     splash.finish(window)
 
     sys.exit(app.exec_())

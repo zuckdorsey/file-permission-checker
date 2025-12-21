@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QProgressBar, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QHBoxLayout, QFrame,
@@ -26,8 +14,9 @@ from PyQt5.QtGui import (
 
 
 class GlassCard(QFrame):
+    """Minimalist card component"""
     
-    def __init__(self, parent=None, blur_radius: int = 20):
+    def __init__(self, parent=None, blur_radius: int = 10):
         super().__init__(parent)
         self.blur_radius = blur_radius
         self.setObjectName("glassCard")
@@ -36,50 +25,54 @@ class GlassCard(QFrame):
     
     def _setup_style(self):
         self.setStyleSheet("""
-            QFrame#glassCard {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 rgba(255, 255, 255, 0.08),
-                    stop:1 rgba(255, 255, 255, 0.03));
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                border-radius: 16px;
+            QFrame
+                background:
+                border: 1px solid
+                border-radius: 8px;
             }
         """)
     
     def _setup_shadow(self):
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(self.blur_radius)
-        shadow.setColor(QColor(0, 0, 0, 80))
-        shadow.setOffset(0, 8)
+        shadow.setColor(QColor(0, 0, 0, 40))
+        shadow.setOffset(0, 2)
         self.setGraphicsEffect(shadow)
 
 
 class ModernButton(QPushButton):
+    """Minimalist flat button"""
     
     STYLES = {
         'primary': {
-            'gradient': ['#667eea', '#764ba2'],
-            'hover': ['#7c8ff5', '#8b5fbf'],
-            'pressed': ['#5a6fd6', '#6a4192']
+            'bg': '#333333',
+            'hover': '#404040',
+            'pressed': '#4a4a4a',
+            'border': '#404040'
         },
         'success': {
-            'gradient': ['#10b981', '#059669'],
-            'hover': ['#34d399', '#10b981'],
-            'pressed': ['#059669', '#047857']
+            'bg': '#166534',
+            'hover': '#15803d',
+            'pressed': '#14532d',
+            'border': '#15803d'
         },
         'warning': {
-            'gradient': ['#f59e0b', '#d97706'],
-            'hover': ['#fbbf24', '#f59e0b'],
-            'pressed': ['#d97706', '#b45309']
+            'bg': '#854d0e',
+            'hover': '#a16207',
+            'pressed': '#713f12',
+            'border': '#a16207'
         },
         'danger': {
-            'gradient': ['#ef4444', '#dc2626'],
-            'hover': ['#f87171', '#ef4444'],
-            'pressed': ['#dc2626', '#b91c1c']
+            'bg': '#991b1b',
+            'hover': '#b91c1c',
+            'pressed': '#7f1d1d',
+            'border': '#b91c1c'
         },
         'secondary': {
-            'gradient': ['rgba(102, 126, 234, 0.3)', 'rgba(118, 75, 162, 0.3)'],
-            'hover': ['rgba(102, 126, 234, 0.5)', 'rgba(118, 75, 162, 0.5)'],
-            'pressed': ['rgba(102, 126, 234, 0.6)', 'rgba(118, 75, 162, 0.6)']
+            'bg': '#1f1f1f',
+            'hover': '#262626',
+            'pressed': '#2a2a2a',
+            'border': '#333333'
         }
     }
     
@@ -88,78 +81,53 @@ class ModernButton(QPushButton):
         super().__init__(text, parent)
         self.button_style = style
         self.update_style()
-        self._setup_animation()
-        self._setup_shadow()
         
         if icon:
             self.setIcon(QIcon(icon))
-            self.setIconSize(QSize(18, 18))
+            self.setIconSize(QSize(16, 16))
     
     def update_style(self, style: str = None):
         if style:
             self.button_style = style
         style_config = self.STYLES.get(self.button_style, self.STYLES['primary'])
-        grad = style_config['gradient']
-        hover = style_config['hover']
-        pressed = style_config['pressed']
         
         self.setStyleSheet(f"""
             QPushButton {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 {grad[0]}, stop:1 {grad[1]});
-                border: none;
-                border-radius: 10px;
-                padding: 12px 28px;
-                color: white;
-                font-weight: 600;
+                background: {style_config['bg']};
+                border: 1px solid {style_config['border']};
+                border-radius: 6px;
+                padding: 10px 20px;
+                color:
+                font-weight: 500;
                 font-size: 13px;
-                min-width: 100px;
             }}
             QPushButton:hover {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 {hover[0]}, stop:1 {hover[1]});
+                background: {style_config['hover']};
             }}
             QPushButton:pressed {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 {pressed[0]}, stop:1 {pressed[1]});
+                background: {style_config['pressed']};
             }}
             QPushButton:disabled {{
-                background: rgba(100, 100, 120, 0.3);
-                color: #64748b;
+                background:
+                color:
+                border: 1px solid
             }}
         """)
     
-    def _setup_animation(self):
-        self._scale = 1.0
-    
-    def _setup_shadow(self):
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(15)
-        shadow.setColor(QColor(102, 126, 234, 100))
-        shadow.setOffset(0, 4)
-        self.setGraphicsEffect(shadow)
-    
     def enterEvent(self, event):
         super().enterEvent(event)
-        shadow = self.graphicsEffect()
-        if shadow:
-            shadow.setBlurRadius(25)
-            shadow.setOffset(0, 6)
     
     def leaveEvent(self, event):
         super().leaveEvent(event)
-        shadow = self.graphicsEffect()
-        if shadow:
-            shadow.setBlurRadius(15)
-            shadow.setOffset(0, 4)
 
 
 class AnimatedProgressBar(QProgressBar):
+    """Minimalist progress bar"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setTextVisible(True)
-        self.setMinimumHeight(28)
+        self.setMinimumHeight(24)
         self._glow_opacity = 0.5
         self._setup_style()
         
@@ -170,18 +138,17 @@ class AnimatedProgressBar(QProgressBar):
     def _setup_style(self):
         self.setStyleSheet("""
             QProgressBar {
-                background: rgba(15, 15, 26, 0.8);
-                border: 1px solid rgba(102, 126, 234, 0.3);
-                border-radius: 14px;
+                background:
+                border: 1px solid
+                border-radius: 4px;
                 text-align: center;
-                color: #ffffff;
-                font-weight: 600;
-                font-size: 12px;
+                color:
+                font-weight: 500;
+                font-size: 11px;
             }
             QProgressBar::chunk {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #667eea, stop:0.5 #764ba2, stop:1 #667eea);
-                border-radius: 13px;
+                background:
+                border-radius: 3px;
             }
         """)
     
@@ -209,32 +176,27 @@ class AnimatedProgressBar(QProgressBar):
 
 
 class PillBadge(QLabel):
+    """Minimalist risk badges"""
     
     RISK_STYLES = {
         'High': {
-            'bg_start': 'rgba(239, 68, 68, 0.25)',
-            'bg_end': 'rgba(220, 38, 38, 0.25)',
-            'border': 'rgba(239, 68, 68, 0.5)',
-            'text': '#fca5a5',
-            'icon': '🔴'
+            'bg': 'rgba(239, 68, 68, 0.15)',
+            'border': 'rgba(239, 68, 68, 0.3)',
+            'text': '#fca5a5'
         },
         'Medium': {
-            'bg_start': 'rgba(245, 158, 11, 0.25)',
-            'bg_end': 'rgba(217, 119, 6, 0.25)',
-            'border': 'rgba(245, 158, 11, 0.5)',
-            'text': '#fcd34d',
-            'icon': '🟠'
+            'bg': 'rgba(251, 191, 36, 0.15)',
+            'border': 'rgba(251, 191, 36, 0.3)',
+            'text': '#fcd34d'
         },
         'Low': {
-            'bg_start': 'rgba(16, 185, 129, 0.25)',
-            'bg_end': 'rgba(5, 150, 105, 0.25)',
-            'border': 'rgba(16, 185, 129, 0.5)',
-            'text': '#6ee7b7',
-            'icon': '🟢'
+            'bg': 'rgba(74, 222, 128, 0.15)',
+            'border': 'rgba(74, 222, 128, 0.3)',
+            'text': '#86efac'
         }
     }
     
-    def __init__(self, risk_level: str = "Low", show_icon: bool = True, parent=None):
+    def __init__(self, risk_level: str = "Low", show_icon: bool = False, parent=None):
         super().__init__(parent)
         self.risk_level = risk_level
         self.show_icon = show_icon
@@ -243,18 +205,16 @@ class PillBadge(QLabel):
     def _apply_style(self):
         style = self.RISK_STYLES.get(self.risk_level, self.RISK_STYLES['Low'])
         
-        text = f"{style['icon']} {self.risk_level}" if self.show_icon else self.risk_level
-        self.setText(text)
+        self.setText(self.risk_level)
         
         self.setStyleSheet(f"""
             QLabel {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 {style['bg_start']}, stop:1 {style['bg_end']});
+                background: {style['bg']};
                 border: 1px solid {style['border']};
-                border-radius: 12px;
-                padding: 5px 14px;
+                border-radius: 4px;
+                padding: 4px 10px;
                 color: {style['text']};
-                font-weight: 600;
+                font-weight: 500;
                 font-size: 11px;
             }}
         """)
@@ -267,6 +227,7 @@ class PillBadge(QLabel):
 
 
 class ModernTableWidget(QTableWidget):
+    """Minimalist table with readable text"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -276,40 +237,42 @@ class ModernTableWidget(QTableWidget):
     def _setup_style(self):
         self.setStyleSheet("""
             QTableWidget {
-                background: rgba(15, 15, 26, 0.7);
-                border: 1px solid rgba(102, 126, 234, 0.3);
-                border-radius: 12px;
-                gridline-color: rgba(102, 126, 234, 0.1);
-                selection-background-color: rgba(102, 126, 234, 0.3);
+                background:
+                border: 1px solid
+                border-radius: 6px;
+                gridline-color:
+                selection-background-color:
             }
             QTableWidget::item {
-                padding: 12px 10px;
-                border-bottom: 1px solid rgba(102, 126, 234, 0.08);
+                padding: 10px 8px;
+                border-bottom: 1px solid
+                color:
             }
             QTableWidget::item:selected {
-                background: rgba(102, 126, 234, 0.35);
-                color: #ffffff;
+                background:
+                color:
             }
             QTableWidget::item:hover {
-                background: rgba(102, 126, 234, 0.18);
+                background:
             }
             QHeaderView::section {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 rgba(102, 126, 234, 0.25), stop:1 rgba(37, 37, 64, 0.8));
+                background:
                 border: none;
-                border-bottom: 2px solid rgba(102, 126, 234, 0.4);
-                border-right: 1px solid rgba(102, 126, 234, 0.15);
-                padding: 14px 12px;
-                color: #ffffff;
-                font-weight: 700;
-                font-size: 12px;
+                border-bottom: 1px solid
+                border-right: 1px solid
+                padding: 10px 8px;
+                color:
+                font-weight: 600;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
             QHeaderView::section:hover {
-                background: rgba(102, 126, 234, 0.4);
+                background:
             }
         """)
         
-        self.setAlternatingRowColors(True)
+        self.setAlternatingRowColors(False)
         self.verticalHeader().setVisible(False)
         self.setShowGrid(False)
     
@@ -394,7 +357,7 @@ class StatCard(GlassCard):
         title_label = QLabel(self.title)
         title_label.setStyleSheet("""
             font-size: 13px;
-            color: #94a3b8;
+            color:
             font-weight: 500;
         """)
         layout.addWidget(title_label)
@@ -407,23 +370,28 @@ class StatCard(GlassCard):
 
 
 class ToastNotification(QFrame):
+    """Minimalist toast notification with visible text"""
     
     TYPES = {
         'success': {
-            'bg': 'rgba(16, 185, 129, 0.9)',
-            'icon': '✅'
+            'bg': '#166534',
+            'border': '#15803d',
+            'icon': '✓'
         },
         'error': {
-            'bg': 'rgba(239, 68, 68, 0.9)',
-            'icon': '❌'
+            'bg': '#991b1b',
+            'border': '#b91c1c',
+            'icon': '✕'
         },
         'warning': {
-            'bg': 'rgba(245, 158, 11, 0.9)',
-            'icon': '⚠️'
+            'bg': '#854d0e',
+            'border': '#a16207',
+            'icon': '!'
         },
         'info': {
-            'bg': 'rgba(102, 126, 234, 0.9)',
-            'icon': 'ℹ️'
+            'bg': '#1e3a5f',
+            'border': '#2563eb',
+            'icon': 'i'
         }
     }
     
@@ -442,34 +410,40 @@ class ToastNotification(QFrame):
         self.setStyleSheet(f"""
             QFrame {{
                 background: {config['bg']};
-                border-radius: 10px;
-                padding: 15px 20px;
+                border: 1px solid {config['border']};
+                border-radius: 6px;
             }}
         """)
         
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(15, 12, 15, 12)
-        layout.setSpacing(12)
+        layout.setContentsMargins(14, 10, 14, 10)
+        layout.setSpacing(10)
         
         icon_label = QLabel(config['icon'])
-        icon_label.setStyleSheet("font-size: 18px;")
+        icon_label.setStyleSheet("""
+            color:
+            font-size: 14px;
+            font-weight: 700;
+            background: transparent;
+        """)
         layout.addWidget(icon_label)
         
         msg_label = QLabel(self.message)
         msg_label.setStyleSheet("""
-            color: white;
-            font-weight: 600;
+            color:
+            font-weight: 500;
             font-size: 13px;
+            background: transparent;
         """)
         layout.addWidget(msg_label)
         
-        self.setFixedHeight(50)
-        self.setMinimumWidth(250)
+        self.setFixedHeight(44)
+        self.setMinimumWidth(220)
         
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(20)
-        shadow.setColor(QColor(0, 0, 0, 100))
-        shadow.setOffset(0, 5)
+        shadow.setBlurRadius(12)
+        shadow.setColor(QColor(0, 0, 0, 80))
+        shadow.setOffset(0, 3)
         self.setGraphicsEffect(shadow)
     
     def _setup_animation(self):
@@ -553,7 +527,7 @@ class ModernLineEdit(QWidget):
                 border: 2px solid rgba(102, 126, 234, 0.3);
                 border-radius: 10px;
                 padding: 14px 18px;
-                color: #e2e8f0;
+                color:
                 font-size: 14px;
             }
             QLineEdit:focus {

@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 from PyQt5.QtWidgets import QLabel, QProgressBar, QTableWidgetItem
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
@@ -84,7 +72,7 @@ class ColoredProgressBar(QProgressBar):
                 border: 1px solid rgba(102, 126, 234, 0.3);
                 border-radius: 12px;
                 text-align: center;
-                color: #ffffff;
+                color:
                 font-weight: 600;
                 font-size: 11px;
             }
@@ -113,7 +101,7 @@ class ColoredProgressBar(QProgressBar):
                 border: 1px solid rgba(102, 126, 234, 0.3);
                 border-radius: 12px;
                 text-align: center;
-                color: #ffffff;
+                color:
                 font-weight: 600;
                 font-size: 11px;
             }}

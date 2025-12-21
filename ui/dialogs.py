@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, 
     QPushButton, QCheckBox, QGroupBox, QGridLayout, QDialogButtonBox,
@@ -21,6 +9,7 @@ from PyQt5.QtGui import QColor, QFont
 
 
 class ModernDialog(QDialog):
+    """Base dialog with minimalist dark theme"""
     
     def __init__(self, parent=None, title="Dialog"):
         super().__init__(parent)
@@ -31,125 +20,133 @@ class ModernDialog(QDialog):
     def _apply_base_style(self):
         self.setStyleSheet("""
             QDialog {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #1a1a2e, stop:1 #16213e);
-                border-radius: 15px;
+                background:
+                border: 1px solid
+                border-radius: 8px;
             }
             QLabel {
-                color: #e2e8f0;
+                color:
             }
             QLineEdit {
-                background: rgba(15, 15, 26, 0.8);
-                border: 2px solid rgba(102, 126, 234, 0.3);
-                border-radius: 8px;
-                padding: 12px 16px;
-                color: #e2e8f0;
+                background:
+                border: 1px solid
+                border-radius: 6px;
+                padding: 10px 14px;
+                color:
                 font-size: 13px;
             }
             QLineEdit:focus {
-                border: 2px solid rgba(102, 126, 234, 0.8);
+                border: 1px solid
+            }
+            QLineEdit:hover {
+                border: 1px solid
             }
             QCheckBox {
-                color: #e2e8f0;
-                spacing: 10px;
+                color:
+                spacing: 8px;
             }
             QCheckBox::indicator {
-                width: 20px;
-                height: 20px;
-                border-radius: 5px;
-                border: 2px solid rgba(102, 126, 234, 0.4);
-                background: rgba(15, 15, 26, 0.8);
+                width: 18px;
+                height: 18px;
+                border-radius: 4px;
+                border: 1px solid
+                background:
+            }
+            QCheckBox::indicator:hover {
+                border: 1px solid
             }
             QCheckBox::indicator:checked {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #667eea, stop:1 #764ba2);
-                border: 2px solid #667eea;
+                background:
+                border: 1px solid
             }
             QGroupBox {
-                background: rgba(37, 37, 64, 0.5);
-                border: 1px solid rgba(102, 126, 234, 0.25);
-                border-radius: 12px;
-                margin-top: 20px;
-                padding: 20px 15px 15px 15px;
-                font-weight: 600;
-                color: #ffffff;
+                background:
+                border: 1px solid
+                border-radius: 6px;
+                margin-top: 16px;
+                padding: 16px 12px 12px 12px;
+                font-weight: 500;
+                color:
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
-                left: 15px;
-                top: 5px;
-                padding: 5px 15px;
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 rgba(102, 126, 234, 0.4), stop:1 rgba(118, 75, 162, 0.4));
-                border-radius: 8px;
+                left: 12px;
+                top: 4px;
+                padding: 4px 10px;
+                background:
+                border-radius: 4px;
+                color:
+                font-size: 12px;
             }
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #667eea, stop:1 #764ba2);
-                border: none;
-                border-radius: 8px;
-                padding: 12px 24px;
-                color: white;
-                font-weight: 600;
+                background:
+                border: 1px solid
+                border-radius: 6px;
+                padding: 10px 20px;
+                color:
+                font-weight: 500;
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #7c8ff5, stop:1 #8b5fbf);
+                background:
             }
             QPushButton:pressed {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #5a6fd6, stop:1 #6a4192);
+                background:
+            }
+            QPushButton:disabled {
+                background:
+                color:
             }
         """)
 
 
 class PasswordDialog(ModernDialog):
+    """Minimalist password dialog"""
     
     def __init__(self, parent=None, title="Enter Password"):
         super().__init__(parent, title)
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(380)
         self.init_ui()
     
     def init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
         
-        header = QLabel("🔐 " + self.windowTitle())
+        header = QLabel(self.windowTitle())
         header.setStyleSheet("""
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color:
+            margin-bottom: 8px;
         """)
         layout.addWidget(header)
         
-        pass_label = QLabel("Password:")
-        pass_label.setStyleSheet("font-weight: 600;")
+        pass_label = QLabel("Password")
+        pass_label.setStyleSheet("font-weight: 500; color: #a3a3a3; font-size: 12px;")
         layout.addWidget(pass_label)
         
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setPlaceholderText("Enter your password")
-        self.password_input.setMinimumHeight(45)
+        self.password_input.setMinimumHeight(40)
         layout.addWidget(self.password_input)
         
-        confirm_label = QLabel("Confirm Password:")
-        confirm_label.setStyleSheet("font-weight: 600;")
+        confirm_label = QLabel("Confirm Password")
+        confirm_label.setStyleSheet("font-weight: 500; color: #a3a3a3; font-size: 12px;")
         layout.addWidget(confirm_label)
         
         self.confirm_input = QLineEdit()
         self.confirm_input.setEchoMode(QLineEdit.Password)
         self.confirm_input.setPlaceholderText("Confirm your password")
-        self.confirm_input.setMinimumHeight(45)
+        self.confirm_input.setMinimumHeight(40)
         layout.addWidget(self.confirm_input)
         
-        self.show_password = QCheckBox("👁️ Show password")
+        self.show_password = QCheckBox("Show password")
         self.show_password.toggled.connect(self.toggle_password_visibility)
         layout.addWidget(self.show_password)
         
-        layout.addSpacing(10)
+        layout.addSpacing(8)
         
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
@@ -157,11 +154,12 @@ class PasswordDialog(ModernDialog):
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setStyleSheet("""
             QPushButton {
-                background: rgba(100, 100, 120, 0.3);
-                color: #e2e8f0;
+                background:
+                border: 1px solid
+                color:
             }
             QPushButton:hover {
-                background: rgba(100, 100, 120, 0.5);
+                background:
             }
         """)
         cancel_btn.clicked.connect(self.reject)
@@ -189,10 +187,11 @@ class PasswordDialog(ModernDialog):
 
 
 class AdvancedPermissionDialog(ModernDialog):
+    """Minimalist advanced permission dialog"""
     
     def __init__(self, parent=None, file_count: int = 1):
-        super().__init__(parent, "Advanced Permission Settings")
-        self.setMinimumWidth(600)
+        super().__init__(parent, "Permission Settings")
+        self.setMinimumWidth(560)
         self.file_count = file_count
         
         self.permission_history = []
@@ -202,52 +201,53 @@ class AdvancedPermissionDialog(ModernDialog):
     
     def init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(25, 25, 25, 25)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(12)
         
         header_layout = QHBoxLayout()
         
-        header = QLabel(f"🔧 Permission Settings")
+        header = QLabel("Permission Settings")
         header.setStyleSheet("""
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            color:
         """)
         header_layout.addWidget(header)
         
-        file_count_badge = QLabel(f"📁 {self.file_count} file(s)")
+        file_count_badge = QLabel(f"{self.file_count} file(s)")
         file_count_badge.setStyleSheet("""
-            background: rgba(102, 126, 234, 0.3);
-            padding: 6px 14px;
-            border-radius: 12px;
-            color: #667eea;
-            font-weight: 600;
+            background:
+            padding: 4px 12px;
+            border-radius: 4px;
+            color:
+            font-weight: 500;
+            font-size: 12px;
         """)
         header_layout.addWidget(file_count_badge)
         header_layout.addStretch()
         
         layout.addLayout(header_layout)
         
-        self.visual_editor_group = QGroupBox("📊 Visual Permission Editor")
+        self.visual_editor_group = QGroupBox("Visual Editor")
         visual_layout = QGridLayout()
-        visual_layout.setSpacing(15)
+        visual_layout.setSpacing(12)
         
         visual_layout.addWidget(QLabel(""), 0, 0)
         
         read_header = QLabel("Read")
-        read_header.setStyleSheet("font-weight: 600; color: #10b981;")
+        read_header.setStyleSheet("font-weight: 500; color: #4ade80;")
         visual_layout.addWidget(read_header, 0, 1, Qt.AlignCenter)
         
         write_header = QLabel("Write")
-        write_header.setStyleSheet("font-weight: 600; color: #f59e0b;")
+        write_header.setStyleSheet("font-weight: 500; color: #fbbf24;")
         visual_layout.addWidget(write_header, 0, 2, Qt.AlignCenter)
         
         exec_header = QLabel("Execute")
-        exec_header.setStyleSheet("font-weight: 600; color: #ef4444;")
+        exec_header.setStyleSheet("font-weight: 500; color: #f87171;")
         visual_layout.addWidget(exec_header, 0, 3, Qt.AlignCenter)
         
-        user_label = QLabel("👤 Owner")
-        user_label.setStyleSheet("font-weight: 600;")
+        user_label = QLabel("Owner")
+        user_label.setStyleSheet("font-weight: 500;")
         visual_layout.addWidget(user_label, 1, 0)
         
         self.user_read = QCheckBox()
@@ -260,8 +260,8 @@ class AdvancedPermissionDialog(ModernDialog):
         visual_layout.addWidget(self.user_write, 1, 2, Qt.AlignCenter)
         visual_layout.addWidget(self.user_execute, 1, 3, Qt.AlignCenter)
         
-        group_label = QLabel("👥 Group")
-        group_label.setStyleSheet("font-weight: 600;")
+        group_label = QLabel("Group")
+        group_label.setStyleSheet("font-weight: 500;")
         visual_layout.addWidget(group_label, 2, 0)
         
         self.group_read = QCheckBox()
@@ -273,8 +273,8 @@ class AdvancedPermissionDialog(ModernDialog):
         visual_layout.addWidget(self.group_write, 2, 2, Qt.AlignCenter)
         visual_layout.addWidget(self.group_execute, 2, 3, Qt.AlignCenter)
         
-        others_label = QLabel("🌐 Others")
-        others_label.setStyleSheet("font-weight: 600;")
+        others_label = QLabel("Others")
+        others_label.setStyleSheet("font-weight: 500;")
         visual_layout.addWidget(others_label, 3, 0)
         
         self.others_read = QCheckBox()
@@ -294,23 +294,24 @@ class AdvancedPermissionDialog(ModernDialog):
                         self.others_read, self.others_write, self.others_execute]:
             checkbox.stateChanged.connect(self.update_permission_from_visual)
         
-        octal_group = QGroupBox("🔢 Octal Permission")
+        octal_group = QGroupBox("Octal Permission")
         octal_layout = QHBoxLayout()
         
         octal_layout.addWidget(QLabel("Permission:"))
         self.permission_input = QLineEdit("644")
         self.permission_input.setPlaceholderText("e.g., 644, 755, 600")
-        self.permission_input.setMaximumWidth(150)
+        self.permission_input.setMaximumWidth(120)
         self.permission_input.textChanged.connect(self.update_visual_from_permission)
         octal_layout.addWidget(self.permission_input)
         
         self.symbolic_label = QLabel("rw-r--r--")
         self.symbolic_label.setStyleSheet("""
-            background: rgba(102, 126, 234, 0.2);
-            padding: 8px 16px;
-            border-radius: 8px;
+            background:
+            padding: 6px 12px;
+            border-radius: 4px;
             font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
+            font-weight: 500;
+            color:
         """)
         octal_layout.addWidget(self.symbolic_label)
         octal_layout.addStretch()
@@ -318,34 +319,35 @@ class AdvancedPermissionDialog(ModernDialog):
         octal_group.setLayout(octal_layout)
         layout.addWidget(octal_group)
         
-        presets_group = QGroupBox("⚡ Quick Presets")
+        presets_group = QGroupBox("Quick Presets")
         presets_layout = QGridLayout()
-        presets_layout.setSpacing(10)
+        presets_layout.setSpacing(8)
         
         presets = [
-            ("644 - Regular Files", "644", "#667eea"),
-            ("755 - Executable/Dirs", "755", "#10b981"),
-            ("600 - Private Files", "600", "#ef4444"),
-            ("640 - Group Readable", "640", "#f59e0b"),
-            ("750 - Group Executable", "750", "#8b5cf6"),
-            ("777 - Full Access ⚠️", "777", "#ef4444"),
-            ("444 - Read Only", "444", "#94a3b8"),
-            ("711 - Execute Only", "711", "#06b6d4")
+            ("644 - Regular", "644"),
+            ("755 - Executable", "755"),
+            ("600 - Private", "600"),
+            ("640 - Group Read", "640"),
+            ("750 - Group Exec", "750"),
+            ("777 - Full Access", "777"),
+            ("444 - Read Only", "444"),
+            ("711 - Exec Only", "711")
         ]
         
-        for i, (label, perm, color) in enumerate(presets):
+        for i, (label, perm) in enumerate(presets):
             btn = QPushButton(label)
-            btn.setStyleSheet(f"""
-                QPushButton {{
-                    background: rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, 0.2);
-                    border: 1px solid {color};
-                    color: {color};
-                    padding: 10px 15px;
-                    font-size: 12px;
-                }}
-                QPushButton:hover {{
-                    background: rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, 0.4);
-                }}
+            btn.setStyleSheet("""
+                QPushButton {
+                    background:
+                    border: 1px solid
+                    color:
+                    padding: 8px 12px;
+                    font-size: 11px;
+                }
+                QPushButton:hover {
+                    background:
+                    color:
+                }
             """)
             btn.clicked.connect(lambda checked, p=perm: self.set_permission(p))
             presets_layout.addWidget(btn, i // 4, i % 4)
@@ -353,37 +355,38 @@ class AdvancedPermissionDialog(ModernDialog):
         presets_group.setLayout(presets_layout)
         layout.addWidget(presets_group)
         
-        cia_group = QGroupBox("🛡️ Security & Backup Options")
-        cia_layout = QVBoxLayout()
-        cia_layout.setSpacing(12)
+        options_group = QGroupBox("Options")
+        options_layout = QVBoxLayout()
+        options_layout.setSpacing(8)
         
-        self.backup_checkbox = QCheckBox("📁 Create backup before changes")
+        self.backup_checkbox = QCheckBox("Create backup before changes")
         self.backup_checkbox.setChecked(True)
-        cia_layout.addWidget(self.backup_checkbox)
+        options_layout.addWidget(self.backup_checkbox)
         
-        self.encrypt_checkbox = QCheckBox("🔒 Encrypt files after changes")
-        cia_layout.addWidget(self.encrypt_checkbox)
+        self.encrypt_checkbox = QCheckBox("Encrypt files after changes")
+        options_layout.addWidget(self.encrypt_checkbox)
         
-        self.verify_checkbox = QCheckBox("✅ Verify integrity with hash")
+        self.verify_checkbox = QCheckBox("Verify integrity with hash")
         self.verify_checkbox.setChecked(True)
-        cia_layout.addWidget(self.verify_checkbox)
+        options_layout.addWidget(self.verify_checkbox)
         
-        self.recursive_checkbox = QCheckBox("📂 Apply recursively to subdirectories")
-        cia_layout.addWidget(self.recursive_checkbox)
+        self.recursive_checkbox = QCheckBox("Apply recursively to subdirectories")
+        options_layout.addWidget(self.recursive_checkbox)
         
-        cia_group.setLayout(cia_layout)
-        layout.addWidget(cia_group)
+        options_group.setLayout(options_layout)
+        layout.addWidget(options_group)
         
         btn_layout = QHBoxLayout()
         
-        preview_btn = QPushButton("👁️ Preview")
+        preview_btn = QPushButton("Preview")
         preview_btn.setStyleSheet("""
             QPushButton {
-                background: rgba(100, 100, 120, 0.3);
-                color: #e2e8f0;
+                background:
+                border: 1px solid
+                color:
             }
             QPushButton:hover {
-                background: rgba(100, 100, 120, 0.5);
+                background:
             }
         """)
         preview_btn.clicked.connect(self.preview)
@@ -394,17 +397,18 @@ class AdvancedPermissionDialog(ModernDialog):
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setStyleSheet("""
             QPushButton {
-                background: rgba(100, 100, 120, 0.3);
-                color: #e2e8f0;
+                background:
+                border: 1px solid
+                color:
             }
             QPushButton:hover {
-                background: rgba(100, 100, 120, 0.5);
+                background:
             }
         """)
         cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(cancel_btn)
         
-        apply_btn = QPushButton("✅ Apply")
+        apply_btn = QPushButton("Apply")
         apply_btn.clicked.connect(self.accept)
         btn_layout.addWidget(apply_btn)
         
@@ -530,77 +534,78 @@ class AdvancedPermissionDialog(ModernDialog):
 
 
 class SettingsDialog(ModernDialog):
+    """Minimalist settings dialog"""
     
     def __init__(self, parent=None):
         super().__init__(parent, "Settings")
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(450)
         self.init_ui()
     
     def init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(25, 25, 25, 25)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(12)
         
-        header = QLabel("⚙️ Application Settings")
+        header = QLabel("Settings")
         header.setStyleSheet("""
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color:
+            margin-bottom: 8px;
         """)
         layout.addWidget(header)
         
-        theme_group = QGroupBox("🎨 Theme")
+        theme_group = QGroupBox("Theme")
         theme_layout = QVBoxLayout()
         
-        self.dark_mode = QCheckBox("🌙 Dark Mode")
+        self.dark_mode = QCheckBox("Dark Mode")
         self.dark_mode.setChecked(True)
         theme_layout.addWidget(self.dark_mode)
         
         theme_group.setLayout(theme_layout)
         layout.addWidget(theme_group)
         
-        scan_group = QGroupBox("🔍 Scan Settings")
+        scan_group = QGroupBox("Scan")
         scan_layout = QGridLayout()
-        scan_layout.setSpacing(12)
+        scan_layout.setSpacing(10)
         
         scan_layout.addWidget(QLabel("Max files to scan:"), 0, 0)
         self.max_files = QLineEdit("10000")
-        self.max_files.setMinimumHeight(40)
+        self.max_files.setMinimumHeight(36)
         scan_layout.addWidget(self.max_files, 0, 1)
         
-        scan_layout.addWidget(QLabel("Cache duration (seconds):"), 1, 0)
+        scan_layout.addWidget(QLabel("Cache duration (sec):"), 1, 0)
         self.cache_duration = QLineEdit("300")
-        self.cache_duration.setMinimumHeight(40)
+        self.cache_duration.setMinimumHeight(36)
         scan_layout.addWidget(self.cache_duration, 1, 1)
         
         scan_group.setLayout(scan_layout)
         layout.addWidget(scan_group)
         
-        security_group = QGroupBox("🔒 Security Settings")
+        security_group = QGroupBox("Security")
         security_layout = QGridLayout()
-        security_layout.setSpacing(12)
+        security_layout.setSpacing(10)
         
-        security_layout.addWidget(QLabel("Session timeout (minutes):"), 0, 0)
+        security_layout.addWidget(QLabel("Session timeout (min):"), 0, 0)
         self.session_timeout = QLineEdit("30")
-        self.session_timeout.setMinimumHeight(40)
+        self.session_timeout.setMinimumHeight(36)
         security_layout.addWidget(self.session_timeout, 0, 1)
         
         security_layout.addWidget(QLabel("Max login attempts:"), 1, 0)
         self.max_attempts = QLineEdit("5")
-        self.max_attempts.setMinimumHeight(40)
+        self.max_attempts.setMinimumHeight(36)
         security_layout.addWidget(self.max_attempts, 1, 1)
         
         security_group.setLayout(security_layout)
         layout.addWidget(security_group)
         
-        backup_group = QGroupBox("💾 Backup Settings")
+        backup_group = QGroupBox("Backup")
         backup_layout = QGridLayout()
-        backup_layout.setSpacing(12)
+        backup_layout.setSpacing(10)
         
         backup_layout.addWidget(QLabel("Max backups:"), 0, 0)
         self.max_backups = QLineEdit("50")
-        self.max_backups.setMinimumHeight(40)
+        self.max_backups.setMinimumHeight(36)
         backup_layout.addWidget(self.max_backups, 0, 1)
         
         backup_group.setLayout(backup_layout)
@@ -614,17 +619,18 @@ class SettingsDialog(ModernDialog):
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setStyleSheet("""
             QPushButton {
-                background: rgba(100, 100, 120, 0.3);
-                color: #e2e8f0;
+                background:
+                border: 1px solid
+                color:
             }
             QPushButton:hover {
-                background: rgba(100, 100, 120, 0.5);
+                background:
             }
         """)
         cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(cancel_btn)
         
-        save_btn = QPushButton("💾 Save")
+        save_btn = QPushButton("Save")
         save_btn.clicked.connect(self.accept)
         btn_layout.addWidget(save_btn)
         

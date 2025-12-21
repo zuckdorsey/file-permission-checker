@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 from .constants import *
 from .helpers import *
 
@@ -19,6 +7,7 @@ __all__ = [
     'BACKUP_HISTORY_LIMIT',
     'SCAN_CACHE_DURATION',
     'RISK_COLORS',
+    'RISK_TO_PERMISSION',
     'SENSITIVE_EXTENSIONS',
     'EXECUTABLE_EXTENSIONS',
     'DEFAULT_PERMISSIONS',
