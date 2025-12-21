@@ -1,358 +1,185 @@
-# 📋 Advanced File Permission Checker
+# File Permission Checker
 
-Aplikasi PyQt5 yang canggih untuk memeriksa, menganalisis, dan memperbaiki izin file secara otomatis dengan berbagai fitur enterprise-level.
+A PyQt5 desktop application for scanning, analyzing, and securing file permissions on Unix-based systems.
 
-## ✨ Fitur Lengkap
+## Overview
 
-### 1. **Risk Level Analysis** 🎯
+File Permission Checker provides a graphical interface for managing file permissions across directories. It identifies security risks, suggests fixes, and includes features for backup, encryption, and integrity verification.
 
-- Analisis otomatis tingkat risiko: **Low**, **Medium**, **High**
-- Color-coded display untuk identifikasi cepat
-- Deteksi permission berbahaya (777, 666, dll)
+## Features
 
-### 2. **Auto Color Highlighting** 🎨
+- Permission scanning with risk analysis
+- Automatic permission fixing based on configurable rules
+- AES-256 file encryption with password protection
+- Automatic backup before permission changes
+- SHA-256 integrity verification
+- Export to CSV and JSON formats
+- SQLite audit logging
 
-- 🔴 **Merah**: High risk files (world-writable)
-- 🟠 **Orange**: Medium risk files
-- 🟢 **Hijau**: Safe/Low risk files
+## Requirements
 
-### 3. **Auto Fix Permissions** 🔧
+- Python 3.8 or higher
+- PyQt5
+- cryptography
 
-- Perbaikan otomatis dengan satu klik
-- Menggunakan custom rules untuk file spesifik
-- Default safe permissions (644 untuk files)
-
-### 4. **Statistics Dashboard** 📊
-
-- Total file count
-- Breakdown berdasarkan risk level
-- Real-time updates saat scanning
-
-### 5. **Export Capabilities** 💾
-
-- **CSV Export**: Untuk analisis di Excel/spreadsheet
-- **JSON Export**: Untuk integrasi dengan sistem lain
-- Includes metadata lengkap dan timestamp
-
-### 6. **Advanced Filtering** 🔍
-
-- Filter by risk level
-- Search by filename
-- Real-time table filtering
-
-### 7. **Progress Bar** ⏳
-
-- Visual feedback saat scanning
-- Percentage completion
-- Non-blocking UI (background thread)
-
-### 8. **Status Bar** 📢
-
-- Real-time status messages
-- Operation feedback
-- Error notifications
-
-### 9. **Custom Rule Engine** 📜
-
-File-specific permission rules:
-
-```python
-CUSTOM_RULES = {
-    '.env': '600',      # Environment files
-    '.git': '700',      # Git directory
-    'storage': '755',   # Storage directories
-    'config': '644',    # Config files
-    'private': '600',   # Private files
-}
-```
-
-### 10. **Dark Mode** 🌙
-
-- Eye-friendly dark theme
-- Toggle dengan checkbox
-- Persistent across sessions
-
-### 11. **SQLite Logging** 💿
-
-- Automatic scan logging
-- Historical data tracking
-- Query past scans
-
-### 12. **Drag & Drop Support** 🖱️
-
-- Drag folder directly ke window
-- Instant path population
-- User-friendly interface
-
-### 13. **Multi-threading** ⚡
-
-- Non-blocking UI
-- Responsive during long scans
-- Progress updates in real-time
-
-### 14. **Detailed Information** 📝
-
-- Octal permissions (644, 755)
-- Symbolic permissions (rwxr-xr-x)
-- File size (formatted)
-- Last modified date
-- Relative path
-
-## 🚀 Installation
+## Installation
 
 ```bash
-# Install dependencies
-pip install PyQt5
+git clone https://github.com/zuckdorsey/file-permission-checker.git
+cd file-permission-checker
 
-# Run the application
+python -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+## Usage
+
+```bash
 python main.py
 ```
 
-## 📖 Usage Guide
+### Scanning
 
-### Basic Scan
+1. Enter the folder path or use the browse button
+2. Click Scan to analyze permissions
+3. Results are displayed in the table with risk indicators
 
-1. Click **"Browse..."** atau drag & drop folder
-2. Click **"Scan Folder"**
-3. Wait for progress bar to complete
-4. Review results in table
+### Fixing Permissions
 
-### Fix Risky Permissions
+1. Click Fix Risky to fix all high-risk files
+2. Or right-click specific files for individual actions
+3. Use Advanced Settings for custom permission values
 
-1. After scan, click **"Fix Risky Permissions"**
-2. Confirm the action
-3. Application will auto-fix based on rules
+### Encryption
 
-### Export Results
+1. Navigate to the Encryption tab
+2. Add files using the file browser
+3. Enter a password and click Start Processing
 
-1. Click **"Export CSV"** or **"Export JSON"**
-2. Choose save location
-3. File will be saved with timestamp
+### Backup
 
-### Apply Filters
+1. Navigate to the Backups tab
+2. Select a folder and create a backup
+3. Restore from backup history when needed
 
-1. Use **"Filter"** dropdown untuk risk level
-2. Use **"Search"** box untuk cari file specific
-3. Table updates automatically
+## Risk Classification
 
-## 🛡️ CIA Triad Implementation
+Files are classified based on sensitivity:
 
-Aplikasi ini menerapkan prinsip **Confidentiality, Integrity, dan Availability (CIA)** untuk keamanan data:
+| Risk Level | Description | Recommended Permission |
+|------------|-------------|------------------------|
+| High | Sensitive files (keys, credentials, configs) | 600 (owner read/write only) |
+| Medium | Configuration and script files | 640 (owner + group read) |
+| Low | Standard files and documents | 644 (world readable) |
 
-### 1. Confidentiality (Kerahasiaan) 🔒
-- **Secure Logs**: Database log (`scan_logs.db`) otomatis di-set ke permission `600` (hanya owner yang bisa baca/tulis).
-- **Secure Exports**: File hasil export (CSV/JSON) juga otomatis di-set ke permission `600` untuk mencegah akses tidak sah.
-
-### 2. Integrity (Integritas) ✅
-- **Checksum Verification**: Setiap kali melakukan export, aplikasi akan membuat file checksum `.sha256`.
-- **Tamper Detection**: User bisa memverifikasi bahwa file report tidak dimodifikasi dengan membandingkan hash-nya.
-
-### 3. Availability (Ketersediaan) 🛡️
-- **Robust Scanning**: Scanner menangani error permission (`PermissionError`) dengan graceful.
-- **Error Reporting**: File yang tidak bisa diakses akan ditandai sebagai "Permission Denied" di tabel, bukan crash atau di-skip diam-diam.
-
-## 🔒 Permission Analysis
-
-### Risk Levels
-
-#### High Risk 🔴
-
-- **777**: World writable (anyone can modify)
-- **666**: World readable/writable
-- **Sensitive files** with group/world permissions (.env, .key, .pem)
-
-#### Medium Risk 🟠
-
-- Group or other writable permissions
-- Executable permissions on non-executable files
-- Public readable sensitive files
-
-#### Low Risk 🟢
-
-- Standard safe permissions
-- 644 for regular files
-- 755 for directories
-- 600 for private files
-
-### Permission Format Examples
-
-**Octal Format:**
-
-- `644` = rw-r--r-- (owner: read+write, group/others: read)
-- `755` = rwxr-xr-x (owner: all, group/others: read+execute)
-- `600` = rw------- (owner: read+write only)
-- `777` = rwxrwxrwx (everyone: all permissions) ⚠️ DANGEROUS
-
-**Symbolic Format:**
+## Project Structure
 
 ```
-rwxrwxrwx
-│││││││││
-││││││││└─ Others execute
-│││││││└── Others write
-││││││└─── Others read
-│││││└──── Group execute
-││││└───── Group write
-│││└────── Group read
-││└─────── Owner execute
-│└──────── Owner write
-└───────── Owner read
+file-permission-checker/
+├── main.py                 # Application entry point
+├── style.qss               # Qt stylesheet
+├── core/
+│   ├── scanner.py          # File scanning
+│   ├── permission_fixer.py # Permission modification
+│   ├── security.py         # Encryption/decryption
+│   ├── backup.py           # Backup management
+│   ├── integrity.py        # Hash verification
+│   ├── pipeline.py         # Workflow orchestration
+│   └── database.py         # SQLite logging
+├── ui/
+│   ├── main_window.py      # Main window
+│   ├── dialogs.py          # Dialog windows
+│   └── modern_widgets.py   # Custom widgets
+├── utils/
+│   ├── constants.py        # Configuration
+│   └── helpers.py          # Utility functions
+└── docs/
+    ├── RISK_LEVEL_SPECIFICATION.md
+    ├── RISK_TO_PERMISSION_MAPPING.md
+    └── UI_DESIGN_SYSTEM.md
 ```
 
-## 📊 Statistics Examples
+## Configuration
 
-After scanning:
+Custom permission rules can be defined in `utils/constants.py`:
 
-```
-Total File: 1247
-✅ Aman: 1156
-⚠️ Medium Risk: 67
-🔴 High Risk: 24
-```
+```python
+CUSTOM_RULES = {
+    '.env': '600',
+    '.pem': '600',
+    '.key': '600',
+    'id_rsa': '600',
+    '.conf': '644',
+    '.sh': '755',
+}
 
-## 🗃️ Database Schema
-
-```sql
-CREATE TABLE scan_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    scan_date DATETIME,
-    folder_path TEXT,
-    total_files INTEGER,
-    high_risk INTEGER,
-    medium_risk INTEGER,
-    low_risk INTEGER
-);
+RISK_TO_PERMISSION = {
+    'High': {'file': '600', 'dir': '700'},
+    'Medium': {'file': '640', 'dir': '750'},
+    'Low': {'file': '644', 'dir': '755'},
+}
 ```
 
-## 🎨 Dark Mode
+## Security Pipeline
 
-Toggle dengan checkbox **"🌙 Dark Mode"** di header.
+The application executes permission changes through a secure pipeline:
 
-Dark mode menggunakan QPalette dengan color scheme:
+1. Scan files and determine risk levels
+2. Create backup of current state
+3. Generate hash of original files
+4. Apply encryption if requested
+5. Modify permissions
+6. Verify integrity with new hash
+7. Rollback on any failure
 
-- Background: #353535
-- Text: White
-- Alternate rows: Auto-colored
-- Highlight: #2A82DA
+## Keyboard Shortcuts
 
-## 📤 Export Formats
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+S | Start scan |
+| Ctrl+F | Fix permissions |
+| Ctrl+E | Export to CSV |
+| F5 | Refresh view |
 
-### CSV Format
+## Export Formats
+
+### CSV
 
 ```csv
 Filename,Path,Mode,Symbolic,Risk Level,Expected,Size,Modified
-.env,config/.env,644,rw-r--r--,Low,600,1.2 KB,2025-11-20 10:30
+.env,config/.env,644,rw-r--r--,High,600,1.2 KB,2025-01-15
 ```
 
-### JSON Format
+### JSON
 
 ```json
 {
-  "scan_date": "2025-11-20T10:30:00",
-  "folder": "/home/user/project",
-  "total_files": 1247,
+  "scan_date": "2025-01-15T10:30:00",
+  "folder": "/path/to/project",
+  "total_files": 500,
   "statistics": {
-    "high_risk": 24,
-    "medium_risk": 67,
-    "low_risk": 1156
+    "high_risk": 12,
+    "medium_risk": 45,
+    "low_risk": 443
   },
   "files": [...]
 }
 ```
 
-## 🛠️ Technical Details
+## Documentation
 
-### Threading Architecture
+Additional documentation is available in the `docs/` directory:
 
-- **Main Thread**: UI updates
-- **Scan Thread**: File scanning
-- **Signals**: progress, file_found, finished
+- Risk Level Specification: Detailed risk classification criteria
+- Risk to Permission Mapping: Permission recommendations by risk level
+- UI Design System: Theme and component specifications
 
-### Permission Detection
+## License
 
-```python
-# Get file stats
-file_stat = os.stat(filepath)
+MIT License
 
-# Check owner permissions
-is_readable = bool(file_stat.st_mode & stat.S_IRUSR)
-is_writable = bool(file_stat.st_mode & stat.S_IWUSR)
-is_executable = bool(file_stat.st_mode & stat.S_IXUSR)
+## Author
 
-# Get octal representation
-mode_octal = oct(file_stat.st_mode)[-3:]
-
-# Get symbolic representation
-mode_symbolic = stat.filemode(file_stat.st_mode)
-```
-
-### Auto-Fix Logic
-
-```python
-# For risky files
-if file_data['expected']:
-    # Use custom rule
-    new_mode = int(file_data['expected'], 8)
-else:
-    # Use safe default
-    new_mode = 0o644
-
-os.chmod(filepath, new_mode)
-```
-
-## 🎯 Use Cases
-
-1. **Security Audit**: Scan project directories untuk security issues
-2. **DevOps**: Pre-deployment permission checks
-3. **Compliance**: Ensure files meet security standards
-4. **Cleanup**: Batch fix permissions after git clone
-5. **Education**: Learn about file permissions
-
-## ⚠️ Important Notes
-
-- **Backup**: Always backup before mass permission changes
-- **Root Access**: Some files may require sudo
-- **Testing**: Test on non-critical folders first
-- **Symbolic Links**: Application follows symlinks
-
-## 🔧 Customization
-
-Edit `CUSTOM_RULES` dictionary untuk menambah rules:
-
-```python
-CUSTOM_RULES = {
-    '.env': '600',
-    'id_rsa': '600',
-    'authorized_keys': '600',
-    'nginx.conf': '644',
-    'ssl': '700',
-}
-```
-
-## 📝 License
-
-MIT License - Feel free to use and modify!
-
-## 🤝 Contributing
-
-Contributions welcome! Areas to improve:
-
-- PDF export functionality
-- More custom rules
-- Permission templates
-- Recursive directory permissions
-- Undo functionality
-
-## 🐛 Known Issues
-
-- PDF export not yet implemented (CSV/JSON available)
-- Large folders (10k+ files) may take time
-- Requires appropriate permissions to modify files
-
-## 📧 Support
-
-For issues or questions, please open an issue on the repository.
-
----
-
-**Made with ❤️ using PyQt5**
+zuckdorsey - https://github.com/zuckdorsey

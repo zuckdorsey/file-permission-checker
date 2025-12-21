@@ -1,328 +1,213 @@
-# 📋 Risk Level Specification Document
+# Risk Level Specification
 
-## File Permission Risk Level Analysis
+## Overview
 
-Dokumen ini mendefinisikan kategori tingkat risiko untuk file permission dalam konteks **File Permission Checker** application. Setiap level risiko menggambarkan potensi dampak jika file dengan permission berbahaya disalahgunakan oleh pihak tidak bertanggung jawab.
+This document defines the risk level categories for file permissions in the File Permission Checker application. Each risk level describes the potential impact if files with dangerous permissions are exploited.
 
----
+## Risk Level Summary
 
-## 🎯 Ringkasan Kategori Risk Level
+| Level | Permission Examples | Potential Impact |
+|-------|---------------------|------------------|
+| High | 777, 666, 767, 676 | Critical - Full access by anyone |
+| Medium | 775, 664, 755 (on sensitive files) | Moderate - Group/World can read/execute |
+| Low | 644, 600, 755 (standard) | Minimal - Permissions follow security standards |
 
-| Level | Warna | Permission Examples | Dampak Potensial |
-|:-----:|:-----:|:-------------------:|:-----------------|
-| **High** | 🔴 Merah | 777, 666, 767, 676 | Kritikal - Akses penuh oleh siapapun |
-| **Medium** | 🟠 Oranye | 775, 664, 755 (pada sensitive files) | Moderat - Group/World dapat membaca/exec |
-| **Low** | 🟢 Hijau | 644, 600, 755 (standar) | Minimal - Permission sesuai standar keamanan |
+## High Risk
 
----
+### Definition
 
-## 🔴 Level 1: HIGH RISK (Risiko Tinggi)
+Files with permissions that allow anyone (other/world) to read, write, and/or execute without restrictions. This is the most dangerous condition because there is no effective access control.
 
-### Definisi
-File dengan permission yang memungkinkan **siapa saja** (other/world) untuk membaca, menulis, dan/atau mengeksekusi file tanpa batasan. Ini adalah kondisi paling berbahaya karena tidak ada kontrol akses yang efektif.
+### Permission Patterns
 
-### Permission Patterns yang Termasuk High Risk
+| Octal | Symbolic | Description |
+|-------|----------|-------------|
+| 777 | rwxrwxrwx | All users can read, write, execute |
+| 666 | rw-rw-rw- | All users can read and write |
+| 767 | rwxrw-rwx | Owner and World full access |
+| 676 | rw-rwxrw- | Group full access, owner/world read-write |
 
-| Permission Octal | Symbolic | Penjelasan |
-|:----------------:|:--------:|:-----------|
-| `777` | `rwxrwxrwx` | Semua user dapat read, write, execute |
-| `666` | `rw-rw-rw-` | Semua user dapat read dan write |
-| `767` | `rwxrw-rwx` | Owner dan World full access |
-| `676` | `rw-rwxrw-` | Group full access, owner/world read-write |
+### Sensitive File Extensions
 
-### Sensitive Files dengan Group/World Write Permission
-Ekstensi file sensitif yang secara otomatis dikategorikan **High Risk** jika memiliki group/world access:
+Files with these extensions are automatically categorized as High Risk if they have group/world access:
 
-- `.env` - Environment variables (API keys, credentials)
-- `.key` - Encryption keys
-- `.pem` - SSL/TLS certificates & private keys
-- `.conf` - Configuration files
-- `.ini` - Configuration files
-- `.sql` - Database scripts/dumps
-- `.db` - Database files
-- `.pwd` - Password files
+- .env - Environment variables
+- .key - Encryption keys
+- .pem - SSL/TLS certificates and private keys
+- .conf - Configuration files
+- .ini - Configuration files
+- .sql - Database scripts/dumps
+- .db - Database files
+- .pwd - Password files
 
-### Dampak Jika Disalahgunakan
+### Impact Analysis
 
-#### 🚨 Confidentiality Impact (CRITICAL)
-- **Data Exposure**: File credentials (.env, .key) dapat dibaca oleh any user di sistem
-- **Credential Theft**: API keys, database passwords, encryption keys terekspos
-- **Sensitive Data Leak**: Informasi pribadi, konfigurasi sistem bocor
+**Confidentiality**
+- Credential files can be read by any user on the system
+- API keys, database passwords, encryption keys exposed
+- Sensitive configuration data leaked
 
-#### 🚨 Integrity Impact (CRITICAL)
-- **Malicious Modification**: Attacker dapat mengubah isi file secara bebas
-- **Code Injection**: Script/executable dapat dimodifikasi untuk malicious purposes
-- **Configuration Tampering**: Settings diubah untuk memfasilitasi attack lebih lanjut
+**Integrity**
+- Attackers can modify file contents freely
+- Scripts and executables can be altered for malicious purposes
+- Configuration tampering to facilitate further attacks
 
-#### 🚨 Availability Impact (HIGH)
-- **File Corruption**: Data dapat rusak/dihapus secara sengaja
-- **Service Disruption**: Config files diubah menyebabkan service crash
-- **Ransomware Entry Point**: Files dapat di-encrypt oleh malicious actors
-
-### Use Case Examples
-
-#### Use Case 1: Exposed API Keys
-```
-Skenario: File .env dengan permission 666
-Path: /var/www/myapp/.env
-Content: 
-  DATABASE_URL=postgres://admin:secret123@db.example.com/prod
-  STRIPE_SECRET_KEY=sk_live_xxxxxxxxxxxx
-
-Dampak:
-  ✗ Any user di server dapat membaca database credentials
-  ✗ Payment gateway keys terekspos → financial fraud
-  ✗ Attacker dapat memodifikasi credentials untuk redirect data
-```
-
-#### Use Case 2: World-Writable Script
-```
-Skenario: Cron script dengan permission 777
-Path: /opt/scripts/daily_backup.sh
-
-Dampak:
-  ✗ Attacker inject malicious code ke script
-  ✗ Code dieksekusi sebagai root (jika cron runs as root)
-  ✗ Full system compromise via privilege escalation
-```
-
-#### Use Case 3: Exposed SSL Private Key
-```
-Skenario: SSL private key dengan permission 666
-Path: /etc/ssl/private/server.key
-
-Dampak:
-  ✗ Attacker dapat decrypt HTTPS traffic
-  ✗ Man-in-the-middle attacks menjadi mungkin
-  ✗ Impersonation attacks dengan certificate yang valid
-```
+**Availability**
+- Data can be corrupted or deleted intentionally
+- Configuration changes causing service crashes
+- Entry point for ransomware attacks
 
 ### Recommended Actions
-- **Immediate Fix Required**: Permission harus segera diperbaiki
-- **Standard Safe Permission**: `600` (rw-------)
-- **Action**: Use "Fix Risky Permissions" feature
 
----
+- Immediate fix required
+- Standard safe permission: 600 (rw-------)
+- Use "Fix Risky Permissions" feature
 
-## 🟠 Level 2: MEDIUM RISK (Risiko Sedang)
+## Medium Risk
 
-### Definisi
-File dengan permission yang memungkinkan **group** atau **other/world** memiliki akses lebih dari yang diperlukan, namun tidak sepenuhnya terbuka. Ini memerlukan perhatian tetapi tidak sekritis High Risk.
+### Definition
 
-### Permission Patterns yang Termasuk Medium Risk
+Files with permissions that allow group or other/world to have more access than necessary, but not completely open. This requires attention but is not as critical as High Risk.
 
-| Permission Octal | Symbolic | Penjelasan |
-|:----------------:|:--------:|:-----------|
-| `775` | `rwxrwxr-x` | Group write + world execute |
-| `664` | `rw-rw-r--` | Group write + world read |
-| `755` (sensitive) | `rwxr-xr-x` | World execute pada sensitive file |
+### Permission Patterns
+
+| Octal | Symbolic | Description |
+|-------|----------|-------------|
+| 775 | rwxrwxr-x | Group write + world execute |
+| 664 | rw-rw-r-- | Group write + world read |
+| 755 (sensitive) | rwxr-xr-x | World execute on sensitive file |
 | Symlinks | Any | Symbolic links (pointer risks) |
 
-### Kondisi Medium Risk
-1. **Group-Writable Files** (mode[1] = 6 atau 7)
-2. **World-Executable Non-Standard Files**
-3. **Symbolic Links** (inherent redirection risk)
-4. **Sensitive Extensions dengan Group/World Read**
+### Conditions
 
-### Dampak Jika Disalahgunakan
+1. Group-writable files (mode[1] = 6 or 7)
+2. World-executable non-standard files
+3. Symbolic links (inherent redirection risk)
+4. Sensitive extensions with group/world read
 
-#### ⚠️ Confidentiality Impact (MODERATE)
-- **Limited Exposure**: Hanya user dalam group tertentu yang dapat akses
-- **Information Leakage**: Config files readable oleh unintended users
-- **Reconnaissance**: Attacker dapat gather system information
+### Impact Analysis
 
-#### ⚠️ Integrity Impact (MODERATE)
-- **Group-Level Modification**: Members of same group dapat modify
-- **Symlink Attacks**: Redirect files ke malicious targets
-- **Subtle Tampering**: Perubahan kecil yang sulit dideteksi
+**Confidentiality**
+- Limited exposure to users in specific groups
+- Configuration files readable by unintended users
+- Information gathering for reconnaissance
 
-#### ⚠️ Availability Impact (LOW-MODERATE)
-- **Service Instability**: Config changes menyebabkan unexpected behavior
-- **Resource Manipulation**: Shared files dapat di-lock atau di-modify
+**Integrity**
+- Members of same group can modify files
+- Symlink attacks redirecting to malicious targets
+- Subtle tampering that is difficult to detect
 
-### Use Case Examples
-
-#### Use Case 1: Group-Writable Config
-```
-Skenario: Nginx config dengan permission 664
-Path: /etc/nginx/sites-available/mysite.conf
-Group: www-data
-
-Dampak:
-  ⚠ Any user dalam www-data group dapat modify config
-  ⚠ Web developer yang tidak authorized dapat mengubah routing
-  ⚠ Potential for internal misuse atau accidental changes
-```
-
-#### Use Case 2: Symbolic Link Vulnerability
-```
-Skenario: Symlink ke sensitive file
-Path: /var/log/app/current.log → /etc/passwd
-
-Dampak:
-  ⚠ Log reading operations might expose passwd file
-  ⚠ Log writing dengan elevated privileges bisa overwrite passwd
-  ⚠ Symlink race conditions mungkin terjadi
-```
-
-#### Use Case 3: Executable Log File
-```
-Skenario: Log file dengan execute permission (755)
-Path: /var/log/application.log
-
-Dampak:
-  ⚠ Jika attacker dapat inject code ke log
-  ⚠ Executed via path traversal atau log inclusion attacks
-  ⚠ Unnecessary permission surface area
-```
+**Availability**
+- Configuration changes causing unexpected behavior
+- Shared files can be locked or modified
 
 ### Recommended Actions
-- **Review Required**: Evaluate apakah permission memang diperlukan
-- **Recommended Permission**: `644` untuk files, `755` untuk directories
-- **Action**: Consider tightening jika tidak ada justifikasi bisnis
 
----
+- Review required
+- Recommended permission: 644 for files, 755 for directories
+- Consider tightening if no business justification
 
-## 🟢 Level 3: LOW RISK (Risiko Rendah)
+## Low Risk
 
-### Definisi
-File dengan permission yang mengikuti **best practices keamanan standar**. Owner memiliki kontrol penuh, sementara group dan world memiliki akses minimal atau tidak ada sama sekali.
+### Definition
 
-### Permission Patterns yang Termasuk Low Risk
+Files with permissions that follow security best practices. Owner has full control while group and world have minimal or no access.
 
-| Permission Octal | Symbolic | Typical Use |
-|:----------------:|:--------:|:------------|
-| `644` | `rw-r--r--` | Regular files (default) |
-| `600` | `rw-------` | Private/sensitive files |
-| `755` | `rwxr-xr-x` | Executable/directories (standar) |
-| `700` | `rwx------` | Private directories |
-| `640` | `rw-r-----` | Shared read within group |
-| `750` | `rwxr-x---` | Group-accessible directories |
+### Permission Patterns
 
-### Karakteristik Low Risk
-1. **Owner-Centric Access**: Hanya owner yang dapat write
-2. **Principle of Least Privilege**: Minimal access untuk others
-3. **Industry Standard Permissions**: Mengikuti UNIX best practices
-4. **No Write for Group/Others**: Mencegah unauthorized modification
+| Octal | Symbolic | Typical Use |
+|-------|----------|-------------|
+| 644 | rw-r--r-- | Regular files (default) |
+| 600 | rw------- | Private/sensitive files |
+| 755 | rwxr-xr-x | Executables/directories (standard) |
+| 700 | rwx------ | Private directories |
+| 640 | rw-r----- | Shared read within group |
+| 750 | rwxr-x--- | Group-accessible directories |
 
-### Dampak Jika Disalahgunakan
+### Characteristics
 
-#### ✅ Confidentiality Impact (MINIMAL)
-- **Controlled Access**: Data hanya accessible oleh owner
-- **Read-Only for Others**: Informasi non-sensitif dapat dibaca
-- **Standard Exposure**: Normal operation, no unexpected leaks
+1. Owner-centric access: Only owner can write
+2. Principle of least privilege: Minimal access for others
+3. Industry standard permissions: Following UNIX best practices
+4. No write for group/others: Prevents unauthorized modification
 
-#### ✅ Integrity Impact (MINIMAL)
-- **Owner-Only Modification**: Perubahan memerlukan owner privileges
-- **Audit Trail**: Easier to track siapa yang modify
-- **Change Control**: Unauthorized writes akan fail
+### Impact Analysis
 
-#### ✅ Availability Impact (MINIMAL)
-- **Stable Operation**: Standard permissions = predictable behavior
-- **Protected Resources**: Files aman dari accidental deletion
-- **Normal Service**: No unexpected permission-related issues
+**Confidentiality**
+- Data only accessible by owner
+- Read-only for others on non-sensitive information
+- Standard exposure with no unexpected leaks
 
-### Use Case Examples
+**Integrity**
+- Changes require owner privileges
+- Easier to track modifications
+- Unauthorized writes will fail
 
-#### Use Case 1: Standard Configuration File
-```
-Skenario: Application config dengan permission 644
-Path: /etc/myapp/config.yaml
-
-Status:
-  ✓ Owner (root) dapat read/write
-  ✓ Others dapat read (necessary untuk app operation)
-  ✓ No write access untuk unauthorized users
-  → Permission SESUAI dengan kebutuhan operasional
-```
-
-#### Use Case 2: Private Credentials File
-```
-Skenario: SSH private key dengan permission 600
-Path: /home/user/.ssh/id_rsa
-
-Status:
-  ✓ Hanya owner yang dapat access
-  ✓ SSH daemon akan reject jika permission lebih loose
-  ✓ Industry standard untuk private keys
-  → Permission OPTIMAL untuk sensitive file
-```
-
-#### Use Case 3: Executable Script
-```
-Skenario: Deployment script dengan permission 755
-Path: /usr/local/bin/deploy.sh
-
-Status:
-  ✓ Owner dapat modify script
-  ✓ All users dapat execute (intended behavior)
-  ✓ No unauthorized modification possible
-  → Permission SESUAI untuk shared executable
-```
+**Availability**
+- Standard permissions provide predictable behavior
+- Files protected from accidental deletion
+- No unexpected permission-related issues
 
 ### Recommended Actions
-- **No Action Required**: Permission sudah sesuai standar
-- **Monitoring**: Tetap monitor untuk perubahan
-- **Documentation**: Document jika ada custom requirements
 
----
+- No action required
+- Continue monitoring for changes
+- Document any custom requirements
 
-## 📊 Risk Level → Sensitivity Mapping
+## Sensitivity Mapping
 
-### Mapping Matrix
+### Priority Matrix
 
 | Risk Level | Data Sensitivity | Action Priority | Fix Urgency | Review Cycle |
-|:----------:|:----------------:|:---------------:|:-----------:|:------------:|
-| 🔴 **High** | Critical / Confidential | P1 - Immediate | ASAP (< 24h) | Real-time |
-| 🟠 **Medium** | Sensitive / Internal | P2 - High | Soon (< 1 week) | Weekly |
-| 🟢 **Low** | Public / Normal | P3 - Low | Routine | Monthly |
+|------------|------------------|-----------------|-------------|--------------|
+| High | Critical / Confidential | P1 - Immediate | Within 24 hours | Real-time |
+| Medium | Sensitive / Internal | P2 - High | Within 1 week | Weekly |
+| Low | Public / Normal | P3 - Low | Routine | Monthly |
 
-### Sensitivity Classification
+### Data Classification
 
-#### Critical Data (High Risk Files)
-- Encryption keys & certificates
+**Critical Data (High Risk Files)**
+- Encryption keys and certificates
 - Database credentials
-- API secrets & tokens
+- API secrets and tokens
 - Payment gateway keys
 - Personal Identifiable Information (PII)
 
-#### Sensitive Data (Medium Risk Files)
+**Sensitive Data (Medium Risk Files)**
 - Application configurations
 - Internal documentation
-- Log files dengan business data
+- Log files with business data
 - Non-production credentials
 - User-generated content
 
-#### Normal Data (Low Risk Files)
+**Normal Data (Low Risk Files)**
 - Public web assets (HTML, CSS, JS)
 - Documentation files
 - Open-source code
 - Static resources
 - Compiled binaries
 
----
-
-## 🛡️ CIA Triad Impact Summary
+## CIA Triad Summary
 
 | Aspect | High Risk | Medium Risk | Low Risk |
-|:------:|:---------:|:-----------:|:--------:|
-| **Confidentiality** | 🔴 Critical - Full exposure | 🟠 Moderate - Group exposure | 🟢 Minimal - Controlled access |
-| **Integrity** | 🔴 Critical - Anyone can modify | 🟠 Moderate - Group can modify | 🟢 Minimal - Owner-only modify |
-| **Availability** | 🔴 High - Service disruption | 🟠 Moderate - Instability risk | 🟢 Minimal - Stable operations |
+|--------|-----------|-------------|----------|
+| Confidentiality | Critical - Full exposure | Moderate - Group exposure | Minimal - Controlled access |
+| Integrity | Critical - Anyone can modify | Moderate - Group can modify | Minimal - Owner-only modify |
+| Availability | High - Service disruption | Moderate - Instability risk | Minimal - Stable operations |
 
----
+## Quick Reference
 
-## 📝 Quick Reference Card
+### Dangerous Permissions (Avoid)
 
-### Dangerous Permissions (AVOID)
 ```
-777 - World writable & executable  → NEVER USE
-666 - World readable & writable    → NEVER USE  
-755 on .env files                  → AVOID
-644 on private keys                → AVOID
+777 - World writable and executable (never use)
+666 - World readable and writable (never use)
+755 on .env files (avoid)
+644 on private keys (avoid)
 ```
 
 ### Safe Defaults
+
 ```
 Files:       644 (rw-r--r--)
 Sensitive:   600 (rw-------)
@@ -331,45 +216,14 @@ Directories: 755 (rwxr-xr-x)
 Private Dir: 700 (rwx------)
 ```
 
-### Application-Specific Rules
-```python
-CUSTOM_RULES = {
-    '.env': '600',          # Environment files - owner only
-    '.git': '700',          # Git directory - owner only
-    'storage': '755',       # Storage directories
-    'config': '644',        # Config files - readable
-    'private': '600',       # Private files - owner only
-    'id_rsa': '600',        # SSH keys - strict
-    'authorized_keys': '600', # SSH authorized
-    '*.key': '600',         # Any key files
-    '*.pem': '600',         # SSL certificates
-}
-```
+## References
+
+1. Linux File Permissions - Red Hat Documentation
+2. CIS Benchmarks - File Permissions
+3. OWASP - File Upload Security
+4. NIST SP 800-123 - Guide to General Server Security
 
 ---
 
-## ✅ Acceptance Criteria Checklist
-
-- [x] **High Risk terdefinisi jelas**: Permission 777, 666, dan sensitive files dengan excessive access
-- [x] **Medium Risk terdefinisi jelas**: Group-writable, symbolic links, dan moderate exposure  
-- [x] **Low Risk terdefinisi jelas**: Standard safe permissions 644, 600, 755 sesuai konteks
-- [x] **Dampak per level didokumentasikan**: CIA Triad impact untuk setiap level
-- [x] **Use case examples disediakan**: 3 contoh real-world per kategori
-- [x] **Mapping risk → sensitivity**: Matrix korelasi risk level dengan data sensitivity
-- [x] **Actionable recommendations**: Safe defaults dan remediation steps
-
----
-
-## 📚 References
-
-1. [Linux File Permissions - Red Hat](https://www.redhat.com/sysadmin/linux-file-permissions-explained)
-2. [CIS Benchmarks - File Permissions](https://www.cisecurity.org/benchmark)
-3. [OWASP - File Upload Security](https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload)
-4. [NIST SP 800-123 - Guide to General Server Security](https://csrc.nist.gov/publications/detail/sp/800-123/final)
-
----
-
-**Document Version**: 1.0  
-**Created**: 2025-12-21  
-**Last Updated**: 2025-12-21  
-**Author**: File Permission Checker Team
+Version: 1.0
+Last Updated: 2025-12-21
