@@ -156,22 +156,38 @@ class ScanThread(QThread):
     
     def _determine_risk_level(self, mode: str, filepath: str, is_symlink: bool) -> str:
         """
-        Determine risk level based on FILE SENSITIVITY (not permission danger).
+        Determine risk level based on FILE SENSITIVITY + PERMISSION MATRIX.
         
-        Risk Level indicates how sensitive the file is:
-        - High Risk: Sensitive files that REQUIRE strict permissions (600, 700, 400, 500)
-        - Medium Risk: Moderately sensitive files that need balanced permissions (640, 644, 755, 750)
-        - Low Risk: Non-sensitive files that can have open permissions (666, 777, 664, 757)
+        Risk Level indicates security posture:
+        - High Risk: Sensitive file with LOOSE permissions (needs fixing)
+        - Medium Risk: Moderately sensitive file or symlink
+        - Low Risk: Non-sensitive OR properly secured sensitive file
+        
+        Matrix:
+        | Sensitivity | Permission | Result     |
+        |-------------|------------|------------|
+        | High        | > 600      | High Risk  |
+        | High        | <= 600     | Low Risk   |
+        | Medium      | > 644      | Medium Risk|
+        | Medium      | <= 644     | Low Risk   |
+        | Low         | Any        | Low Risk   |
         """
         filename = os.path.basename(filepath).lower()
         
-        high_risk_extensions = [
+        # Convert mode to integer for comparison
+        try:
+            mode_int = int(mode, 8)
+        except ValueError:
+            mode_int = 0o644  # Default if parsing fails
+        
+        # Define sensitivity categories
+        high_sensitivity_extensions = [
             '.env', '.key', '.pem', '.crt', '.p12', '.pfx',
             '.pwd', '.password', '.secret', '.token',
             '.credentials', '.auth',
         ]
         
-        high_risk_patterns = [
+        high_sensitivity_patterns = [
             'id_rsa', 'id_dsa', 'id_ecdsa', 'id_ed25519',
             'authorized_keys', 'known_hosts',
             '.htpasswd', '.htaccess',
@@ -182,19 +198,9 @@ class ScanThread(QThread):
             '.netrc', '.pgpass',
         ]
         
-        high_risk_dirs = ['.ssh', '.gnupg', 'private', 'secrets', 'credentials']
+        high_sensitivity_dirs = ['.ssh', '.gnupg', 'private', 'secrets', 'credentials']
         
-        if any(filepath.lower().endswith(ext) for ext in high_risk_extensions):
-            return 'High'
-        
-        if any(pattern in filename for pattern in high_risk_patterns):
-            return 'High'
-        
-        if any(f'/{dir_name}/' in filepath.lower() or filepath.lower().endswith(f'/{dir_name}') 
-               for dir_name in high_risk_dirs):
-            return 'High'
-        
-        medium_risk_extensions = [
+        medium_sensitivity_extensions = [
             '.conf', '.config', '.cfg', '.ini', '.yaml', '.yml',
             '.xml', '.properties',
             '.sql', '.db', '.sqlite', '.sqlite3',
@@ -202,36 +208,67 @@ class ScanThread(QThread):
             '.sh', '.bash', '.zsh', '.py', '.rb', '.pl',
         ]
         
-        medium_risk_patterns = [
+        medium_sensitivity_patterns = [
             'config', 'settings', 'database',
             'nginx', 'apache', 'httpd',
             'docker-compose', 'dockerfile',
             'makefile', 'rakefile',
         ]
         
-        if is_symlink:
-            return 'Medium'
+        # Determine file sensitivity level
+        sensitivity = 'low'
         
-        if any(filepath.lower().endswith(ext) for ext in medium_risk_extensions):
-            return 'Medium'
+        # Check for high sensitivity
+        if any(filepath.lower().endswith(ext) for ext in high_sensitivity_extensions):
+            sensitivity = 'high'
+        elif any(pattern in filename for pattern in high_sensitivity_patterns):
+            sensitivity = 'high'
+        elif any(f'/{dir_name}/' in filepath.lower() or filepath.lower().endswith(f'/{dir_name}') 
+               for dir_name in high_sensitivity_dirs):
+            sensitivity = 'high'
+        # Check for medium sensitivity
+        elif any(filepath.lower().endswith(ext) for ext in medium_sensitivity_extensions):
+            sensitivity = 'medium'
+        elif any(pattern in filename for pattern in medium_sensitivity_patterns):
+            sensitivity = 'medium'
+        elif is_symlink:
+            sensitivity = 'medium'
         
-        if any(pattern in filename for pattern in medium_risk_patterns):
-            return 'Medium'
+        # Apply sensitivity + permission matrix
+        if sensitivity == 'high':
+            # High sensitivity files: must be 600 or stricter (e.g., 400, 500)
+            # Check if others or group have any permissions
+            others_perms = mode_int & 0o007  # Last 3 bits
+            group_perms = mode_int & 0o070   # Middle 3 bits
+            
+            if others_perms > 0 or group_perms > 0:
+                # Loose permissions on sensitive file = HIGH RISK
+                return 'High'
+            elif (mode_int & 0o777) > 0o600:
+                # Owner has more than rw (e.g., 700 with execute might be needed for dirs)
+                # Still consider it if group/others can access
+                return 'High' if (mode_int & 0o077) > 0 else 'Low'
+            else:
+                # Properly secured (600 or stricter like 400)
+                return 'Low'
         
-        low_risk_extensions = [
-            '.html', '.css', '.js', '.json',
-            '.md', '.txt', '.rst', '.doc',
-            '.png', '.jpg', '.jpeg', '.gif', '.svg',
-            '.ico', '.webp', '.bmp',
-            '.pdf', '.csv',
-            '.woff', '.woff2', '.ttf', '.eot',
-            '.mp3', '.mp4', '.wav', '.avi',
-        ]
+        elif sensitivity == 'medium':
+            # Medium sensitivity: should be 644 or stricter
+            others_write = mode_int & 0o002  # Others write
+            group_write = mode_int & 0o020   # Group write
+            
+            if others_write > 0 or group_write > 0:
+                # World/group writable = Medium Risk
+                return 'Medium'
+            elif (mode_int & 0o777) > 0o755:
+                # Too permissive
+                return 'Medium'
+            else:
+                return 'Low'
         
-        if any(filepath.lower().endswith(ext) for ext in low_risk_extensions):
+        else:
+            # Low sensitivity: always Low Risk
             return 'Low'
-        
-        return 'Medium'
     
     def _check_custom_rules(self, filepath: str) -> Optional[str]:
         filename = os.path.basename(filepath)

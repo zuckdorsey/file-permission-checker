@@ -665,3 +665,205 @@ class SettingsDialog(ModernDialog):
         self.session_timeout.setText(str(settings.get('session_timeout', 30)))
         self.max_attempts.setText(str(settings.get('max_attempts', 5)))
         self.max_backups.setText(str(settings.get('max_backups', 50)))
+
+
+class ConfirmationDialog(ModernDialog):
+    """
+    Confirmation dialog for high-risk actions.
+    
+    Used for:
+    - Permanent file deletion after encryption
+    - Mass permission changes
+    - Clearing quarantine folder
+    - Deleting backups
+    """
+    
+    SEVERITY_STYLES = {
+        'warning': {
+            'icon': '!',
+            'color': '#f59e0b',
+            'bg': 'rgba(245, 158, 11, 0.15)'
+        },
+        'danger': {
+            'icon': '✕',
+            'color': '#ef4444',
+            'bg': 'rgba(239, 68, 68, 0.15)'
+        },
+        'info': {
+            'icon': 'i',
+            'color': '#3b82f6',
+            'bg': 'rgba(59, 130, 246, 0.15)'
+        }
+    }
+    
+    def __init__(self, parent=None, title="Confirm Action", 
+                 message="Are you sure?", details="", 
+                 severity="warning", confirm_text="Confirm"):
+        super().__init__(parent, title)
+        self.message = message
+        self.details = details
+        self.severity = severity
+        self.confirm_text = confirm_text
+        self.setMinimumWidth(420)
+        self.init_ui()
+    
+    def init_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+        
+        style = self.SEVERITY_STYLES.get(self.severity, self.SEVERITY_STYLES['warning'])
+        
+        # Header with icon
+        header_layout = QHBoxLayout()
+        
+        icon_label = QLabel(style['icon'])
+        icon_label.setStyleSheet(f"""
+            font-size: 24px;
+            font-weight: bold;
+            color: {style['color']};
+            background: {style['bg']};
+            border-radius: 20px;
+            min-width: 40px;
+            max-width: 40px;
+            min-height: 40px;
+            max-height: 40px;
+            qproperty-alignment: AlignCenter;
+        """)
+        header_layout.addWidget(icon_label)
+        
+        title_label = QLabel(self.windowTitle())
+        title_label.setStyleSheet(f"""
+            font-size: 16px;
+            font-weight: 600;
+            color: {style['color']};
+        """)
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+        
+        layout.addLayout(header_layout)
+        
+        # Message
+        msg_label = QLabel(self.message)
+        msg_label.setWordWrap(True)
+        msg_label.setStyleSheet("""
+            color: #e5e5e5;
+            font-size: 14px;
+            line-height: 1.5;
+        """)
+        layout.addWidget(msg_label)
+        
+        # Details (if provided)
+        if self.details:
+            details_label = QLabel(self.details)
+            details_label.setWordWrap(True)
+            details_label.setStyleSheet(f"""
+                color: #a3a3a3;
+                font-size: 12px;
+                background: {style['bg']};
+                border: 1px solid {style['color']}40;
+                border-radius: 6px;
+                padding: 12px;
+            """)
+            layout.addWidget(details_label)
+        
+        # Checkbox for dangerous actions
+        if self.severity == 'danger':
+            self.confirm_checkbox = QCheckBox("I understand this action cannot be undone")
+            self.confirm_checkbox.setStyleSheet(f"color: {style['color']};")
+            layout.addWidget(self.confirm_checkbox)
+        else:
+            self.confirm_checkbox = None
+        
+        layout.addSpacing(8)
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.setStyleSheet("""
+            QPushButton {
+                background: #1f1f1f;
+                border: 1px solid #333333;
+                color: #a3a3a3;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background: #262626;
+            }
+        """)
+        cancel_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(cancel_btn)
+        
+        confirm_btn = QPushButton(self.confirm_text)
+        confirm_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: {style['color']};
+                border: none;
+                color: #0d0d0d;
+                font-weight: 600;
+                min-width: 100px;
+            }}
+            QPushButton:hover {{
+                background: {style['color']}dd;
+            }}
+            QPushButton:disabled {{
+                background: #333333;
+                color: #666666;
+            }}
+        """)
+        confirm_btn.clicked.connect(self._handle_confirm)
+        self.confirm_btn = confirm_btn
+        
+        # Disable confirm button until checkbox is checked for danger actions
+        if self.confirm_checkbox:
+            confirm_btn.setEnabled(False)
+            self.confirm_checkbox.toggled.connect(confirm_btn.setEnabled)
+        
+        btn_layout.addWidget(confirm_btn)
+        layout.addLayout(btn_layout)
+    
+    def _handle_confirm(self):
+        if self.confirm_checkbox and not self.confirm_checkbox.isChecked():
+            return
+        self.accept()
+    
+    @staticmethod
+    def confirm_deletion(parent, file_count: int = 1):
+        """Show confirmation for permanent file deletion."""
+        dialog = ConfirmationDialog(
+            parent=parent,
+            title="Permanent Deletion",
+            message=f"Are you sure you want to permanently delete {file_count} file(s)?",
+            details="This action cannot be undone. The files will be removed from the quarantine folder permanently.",
+            severity="danger",
+            confirm_text="Delete Permanently"
+        )
+        return dialog.exec_() == QDialog.Accepted
+    
+    @staticmethod
+    def confirm_mass_permission_change(parent, file_count: int, new_permission: str):
+        """Show confirmation for mass permission changes."""
+        dialog = ConfirmationDialog(
+            parent=parent,
+            title="Mass Permission Change",
+            message=f"You are about to change permissions on {file_count} file(s) to {new_permission}.",
+            details="Make sure you have a backup before proceeding. Some system files may become inaccessible.",
+            severity="warning",
+            confirm_text="Apply Changes"
+        )
+        return dialog.exec_() == QDialog.Accepted
+    
+    @staticmethod
+    def confirm_clear_quarantine(parent, file_count: int):
+        """Show confirmation for clearing quarantine."""
+        dialog = ConfirmationDialog(
+            parent=parent,
+            title="Clear Quarantine",
+            message=f"Delete all {file_count} files from quarantine?",
+            details="These are original files that were encrypted. Only delete if you have verified the encrypted versions work correctly.",
+            severity="danger",
+            confirm_text="Clear Quarantine"
+        )
+        return dialog.exec_() == QDialog.Accepted

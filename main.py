@@ -23,9 +23,7 @@ sys.path.insert(0, str(project_root))
 
 from ui.main_window import FilePermissionChecker
 
-class ModernSplashScreen(QSplashScreen):
-    """Minimalist splash screen with loading animation"""
-    
+class ModernSplashScreen(QSplashScreen):    
     def __init__(self):
         pixmap = QPixmap(480, 320)
         pixmap.fill(Qt.transparent)

@@ -53,7 +53,7 @@ class GlassCard(QFrame):
 
 
 class ModernButton(QPushButton):
-    """Minimalist flat button"""
+    """Minimalist flat button with distinct styles"""
     
     STYLES = {
         'primary': {
@@ -85,6 +85,20 @@ class ModernButton(QPushButton):
             'hover': '#262626',
             'pressed': '#2a2a2a',
             'border': '#333333'
+        },
+        # Encrypt mode - bright green
+        'encrypt': {
+            'bg': '#166534',
+            'hover': '#15803d',
+            'pressed': '#14532d',
+            'border': '#22c55e'
+        },
+        # Decrypt mode - bright blue  
+        'decrypt': {
+            'bg': '#1e40af',
+            'hover': '#1d4ed8',
+            'pressed': '#1e3a8a',
+            'border': '#3b82f6'
         }
     }
     

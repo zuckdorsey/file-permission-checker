@@ -88,6 +88,8 @@ class PermissionPipeline:
         self.current_step = None
         self.pipeline_result = None
         self._is_cancelled = False
+        self._hashes_before = {}  # Store hashes for integrity comparison
+        self._encrypted_files = set()  # Track encrypted files (hash change expected)
         
         self.progress_callback: Optional[Callable[[int, str], None]] = None
         self.step_callback: Optional[Callable[[PipelineStep, str], None]] = None
@@ -309,6 +311,7 @@ class PermissionPipeline:
                 file_hash = self.integrity_manager.calculate_sha256(filepath)
                 if file_hash:
                     hashes[filepath] = file_hash
+                    self._hashes_before[filepath] = file_hash  # Store for later comparison
                     
                     current_mode = oct(os.stat(filepath).st_mode & 0o777)[2:]
                     self.integrity_manager.register_file_hash(filepath, current_mode)
@@ -472,7 +475,11 @@ class PermissionPipeline:
             )
     
     def _step_hash_after(self, files_data: List[Dict]) -> StepResult:
-        """Step 6: Calculate hashes after changes and verify integrity."""
+        """Step 6: Calculate hashes after changes and verify integrity.
+        
+        IMPORTANT: For permission-only changes, file hash MUST NOT change.
+        If hash changed and file was not encrypted, it indicates data corruption.
+        """
         self.current_step = PipelineStep.HASH_AFTER
         self._notify_progress(0, "Verifying file integrity...")
         
@@ -480,6 +487,7 @@ class PermissionPipeline:
             hashes_after = {}
             integrity_verified = 0
             integrity_failed = 0
+            corrupted_files = []
             
             for i, file_info in enumerate(files_data):
                 filepath = file_info.get('path', '')
@@ -488,7 +496,25 @@ class PermissionPipeline:
                 if file_hash:
                     hashes_after[filepath] = file_hash
                     
-                    if os.access(filepath, os.R_OK):
+                    # Compare with hash_before
+                    hash_before = self._hashes_before.get(filepath)
+                    
+                    if hash_before and hash_before != file_hash:
+                        # Hash changed - check if file was encrypted
+                        if filepath not in self._encrypted_files:
+                            # NOT encrypted but hash changed = DATA CORRUPTION
+                            corrupted_files.append(filepath)
+                            integrity_failed += 1
+                            self.integrity_manager.log_audit_event(
+                                action_type='data_corruption_detected',
+                                file_path=filepath,
+                                details=f"Hash mismatch: before={hash_before[:16]}... after={file_hash[:16]}...",
+                                severity='critical'
+                            )
+                        else:
+                            # Encrypted file - hash change expected
+                            integrity_verified += 1
+                    elif os.access(filepath, os.R_OK):
                         integrity_verified += 1
                     else:
                         integrity_failed += 1
@@ -505,8 +531,18 @@ class PermissionPipeline:
                 json.dump({
                     'timestamp': datetime.now().isoformat(),
                     'type': 'after_changes',
-                    'hashes': hashes_after
+                    'hashes': hashes_after,
+                    'corrupted_files': corrupted_files
                 }, f, indent=2)
+            
+            # CRITICAL: If any file was corrupted, fail and trigger rollback
+            if corrupted_files:
+                return StepResult(
+                    step=PipelineStep.HASH_AFTER,
+                    success=False,
+                    message=f"DATA CORRUPTION DETECTED in {len(corrupted_files)} file(s)",
+                    error=f"Corrupted: {', '.join([os.path.basename(f) for f in corrupted_files[:3]])}{'...' if len(corrupted_files) > 3 else ''}"
+                )
             
             if integrity_failed > 0:
                 return StepResult(

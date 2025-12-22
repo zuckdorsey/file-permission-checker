@@ -118,14 +118,12 @@ class IntegrityManager:
             return False
     
     def _get_current_user(self) -> str:
+        """Get current user with fallback for various environments."""
+        import getpass
         try:
-            return os.getlogin()
-        except:
-            try:
-                import pwd
-                return pwd.getpwuid(os.getuid()).pw_name
-            except:
-                return os.environ.get('USER', 'unknown')
+            return getpass.getuser()
+        except Exception:
+            return os.environ.get('USER', os.environ.get('USERNAME', 'unknown'))
     
     def get_audit_logs(self, limit: int = 100, 
                        action_type: str = None,

@@ -358,9 +358,17 @@ class BackupManager:
         return backup_path
             
     def restore_backup(self, backup_path: str, restore_dir: str) -> Dict:
+        """
+        Restore backup with Zip Slip protection.
+        
+        Validates all extraction paths to prevent directory traversal attacks.
+        """
         try:
             if not os.path.exists(backup_path):
                 return {'success': False, 'error': "Backup file not found"}
+            
+            # Ensure restore_dir is absolute for security comparison
+            restore_dir = os.path.abspath(restore_dir)
             
             checksum_path = backup_path + ".sha256"
             if os.path.exists(checksum_path):
@@ -378,6 +386,13 @@ class BackupManager:
                 for file_info in manifest['files']:
                     try:
                         filename = os.path.basename(file_info['path'])
+                        
+                        # ZIP SLIP PREVENTION: Validate target path
+                        target_path = os.path.abspath(os.path.join(restore_dir, filename))
+                        if not target_path.startswith(restore_dir + os.sep):
+                            results['errors'].append(f"Blocked path traversal attempt: {filename}")
+                            continue
+                        
                         zf.extract(filename, restore_dir)
                         
                         restored_path = os.path.join(restore_dir, filename)
@@ -385,7 +400,8 @@ class BackupManager:
                         if 'permission' in file_info and file_info['permission'] != 'unknown':
                             try:
                                 old_mode = int(file_info['permission'], 8)
-                                os.chmod(restored_path, old_mode)
+                                # Use follow_symlinks=False to prevent symlink attacks
+                                os.chmod(restored_path, old_mode, follow_symlinks=False)
                             except (ValueError, OSError):
                                 pass
                         

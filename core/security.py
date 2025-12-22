@@ -48,39 +48,124 @@ class DecryptionRateLimitError(DecryptionError):
 
 
 class RateLimiter:
+    """
+    Persistent rate limiter that stores failed attempts in database.
     
-    def __init__(self, max_attempts: int = 5, window_seconds: int = 300):
+    Attempts are persisted to scan_logs.db, preventing reset by app restart.
+    """
+    
+    def __init__(self, max_attempts: int = 5, window_seconds: int = 300, db_path: str = "scan_logs.db"):
         self.max_attempts = max_attempts
         self.window_seconds = window_seconds
-        self.attempts = {}
+        self.db_path = db_path
         self.lock = threading.Lock()
+        self._init_table()
+    
+    def _init_table(self):
+        """Initialize rate limit table in database."""
+        import sqlite3
+        try:
+            conn = sqlite3.connect(self.db_path, timeout=10)
+            cursor = conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS rate_limit_attempts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    key TEXT NOT NULL,
+                    timestamp REAL NOT NULL,
+                    ip_address TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_rate_key ON rate_limit_attempts(key)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_rate_timestamp ON rate_limit_attempts(timestamp)')
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Failed to initialize rate limit table: {e}")
+    
+    def _cleanup_old_attempts(self, key: str, conn):
+        """Remove attempts older than window."""
+        import sqlite3
+        now = time.time()
+        cutoff = now - self.window_seconds
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM rate_limit_attempts WHERE key = ? AND timestamp < ?', (key, cutoff))
+        conn.commit()
     
     def check_limit(self, key: str) -> Dict:
+        """Check if action is allowed based on persistent rate limit."""
+        import sqlite3
         with self.lock:
-            now = time.time()
-            if key in self.attempts:
-                self.attempts[key] = [t for t in self.attempts[key] 
-                                    if now - t < self.window_seconds]
-            
-            current_attempts = len(self.attempts.get(key, []))
-            is_allowed = current_attempts < self.max_attempts
-            
-            return {
-                'allowed': is_allowed,
-                'current_attempts': current_attempts,
-                'remaining': self.max_attempts - current_attempts,
-                'wait_time': 0 if is_allowed else self.window_seconds
-            }
+            try:
+                conn = sqlite3.connect(self.db_path, timeout=10)
+                
+                # Cleanup old attempts
+                self._cleanup_old_attempts(key, conn)
+                
+                # Count recent attempts
+                cursor = conn.cursor()
+                now = time.time()
+                cutoff = now - self.window_seconds
+                
+                cursor.execute(
+                    'SELECT COUNT(*) FROM rate_limit_attempts WHERE key = ? AND timestamp >= ?',
+                    (key, cutoff)
+                )
+                current_attempts = cursor.fetchone()[0]
+                
+                conn.close()
+                
+                is_allowed = current_attempts < self.max_attempts
+                
+                # Calculate wait time if blocked
+                wait_time = 0
+                if not is_allowed:
+                    conn = sqlite3.connect(self.db_path, timeout=10)
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        'SELECT MIN(timestamp) FROM rate_limit_attempts WHERE key = ? AND timestamp >= ?',
+                        (key, cutoff)
+                    )
+                    oldest = cursor.fetchone()[0]
+                    conn.close()
+                    if oldest:
+                        wait_time = int(self.window_seconds - (now - oldest))
+                
+                return {
+                    'allowed': is_allowed,
+                    'current_attempts': current_attempts,
+                    'remaining': max(0, self.max_attempts - current_attempts),
+                    'wait_time': max(0, wait_time)
+                }
+                
+            except Exception as e:
+                print(f"Rate limit check failed: {e}")
+                # Fail open to prevent denial of service
+                return {'allowed': True, 'current_attempts': 0, 'remaining': self.max_attempts, 'wait_time': 0}
     
     def record_attempt(self, key: str, success: bool = False):
+        """Record an attempt in the persistent database."""
+        import sqlite3
         with self.lock:
-            if success:
-                if key in self.attempts:
-                    del self.attempts[key]
-            else:
-                if key not in self.attempts:
-                    self.attempts[key] = []
-                self.attempts[key].append(time.time())
+            try:
+                conn = sqlite3.connect(self.db_path, timeout=10)
+                cursor = conn.cursor()
+                
+                if success:
+                    # Clear all attempts on success
+                    cursor.execute('DELETE FROM rate_limit_attempts WHERE key = ?', (key,))
+                else:
+                    # Record failed attempt
+                    cursor.execute(
+                        'INSERT INTO rate_limit_attempts (key, timestamp) VALUES (?, ?)',
+                        (key, time.time())
+                    )
+                
+                conn.commit()
+                conn.close()
+                
+            except Exception as e:
+                print(f"Failed to record rate limit attempt: {e}")
 
 
 class SecurityManager:

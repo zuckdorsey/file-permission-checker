@@ -126,24 +126,43 @@ class ColoredProgressBar(QProgressBar):
 
 
 class RiskTableWidgetItem(QTableWidgetItem):
+    """
+    Risk level display with Secure status for properly configured files.
+    
+    Risk Levels:
+    - High: Sensitive file with loose permissions (RED)
+    - Medium: Moderately sensitive file needing review (YELLOW)
+    - Low: Standard file with acceptable permissions (GREEN)
+    - Secure: Sensitive file with proper strict permissions (BRIGHT GREEN)
+    """
     
     RISK_COLORS = {
         'High': {
             'bg': QColor(239, 68, 68, 50),
-            'fg': QColor(252, 165, 165)
+            'fg': QColor(252, 165, 165),
+            'label': 'High Risk'
         },
         'Medium': {
             'bg': QColor(245, 158, 11, 50),
-            'fg': QColor(252, 211, 77)
+            'fg': QColor(252, 211, 77),
+            'label': 'Medium'
         },
         'Low': {
             'bg': QColor(16, 185, 129, 50),
-            'fg': QColor(110, 231, 183)
+            'fg': QColor(110, 231, 183),
+            'label': 'Low'
+        },
+        'Secure': {
+            'bg': QColor(34, 197, 94, 70),
+            'fg': QColor(134, 239, 172),
+            'label': 'Secure'
         }
     }
     
     def __init__(self, text: str, risk_level: str = "Low"):
-        super().__init__(text)
+        # Map display text to match risk level for proper labeling
+        display_text = self.RISK_COLORS.get(risk_level, self.RISK_COLORS['Low']).get('label', text)
+        super().__init__(display_text)
         self.risk_level = risk_level
         self._apply_style()
     
@@ -160,6 +179,8 @@ class RiskTableWidgetItem(QTableWidgetItem):
     
     def set_risk_level(self, level: str):
         self.risk_level = level
+        label = self.RISK_COLORS.get(level, self.RISK_COLORS['Low']).get('label', level)
+        self.setText(label)
         self._apply_style()
 
 

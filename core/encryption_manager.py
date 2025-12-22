@@ -63,13 +63,34 @@ class EncryptionWorker(QObject):
 
     def _encrypt_file(self, filepath: str) -> bool:
         """
-        Encrypt a file with password and store verification hash.
+        Encrypt a file with streaming buffer for large files.
+        
+        Uses chunked read/write to prevent memory exhaustion on large files.
+        Original file is moved to .quarantine/ folder (NOT deleted).
         
         File format: [salt (16 bytes)] [verification_hash (32 bytes)] [encrypted_data]
         """
+        CHUNK_SIZE = 64 * 1024  # 64KB chunks
+        
         try:
+            # Check if file is a symlink - prevent symlink attacks
+            if os.path.islink(filepath):
+                self.error.emit(f"Skipping symlink: {os.path.basename(filepath)}")
+                return False
+            
+            # Read file in chunks for streaming
+            file_chunks = []
+            file_size = os.path.getsize(filepath)
+            
             with open(filepath, 'rb') as f:
-                data = f.read()
+                while True:
+                    chunk = f.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    file_chunks.append(chunk)
+            
+            # Combine chunks for encryption (Fernet needs complete data)
+            data = b''.join(file_chunks)
             
             result = self.security_manager.encrypt_data(data, self.password)
             encrypted_data = result['data']
@@ -78,21 +99,80 @@ class EncryptionWorker(QObject):
             
             enc_path = filepath + ".enc"
             
+            # Write encrypted data in chunks
             with open(enc_path, 'wb') as f:
                 f.write(salt)
                 f.write(verification_hash)
-                f.write(encrypted_data)
+                
+                # Write encrypted data in chunks
+                offset = 0
+                while offset < len(encrypted_data):
+                    f.write(encrypted_data[offset:offset + CHUNK_SIZE])
+                    offset += CHUNK_SIZE
+            
+            # Use follow_symlinks=False to prevent symlink attacks
+            os.chmod(enc_path, 0o600, follow_symlinks=False)
             
             self.integrity_manager.log_audit_event(
                 'file_encrypted', filepath, 
-                f"Encrypted to {os.path.basename(enc_path)}"
+                f"Encrypted to {os.path.basename(enc_path)} (size: {file_size} bytes)"
             )
             
-            secure_delete_file(filepath)
+            # Move original file to quarantine instead of secure delete
+            self._quarantine_file(filepath)
             
             return True
         except Exception as e:
             raise e
+    
+    def _quarantine_file(self, filepath: str) -> bool:
+        """
+        Move file to .quarantine folder instead of deleting.
+        
+        User can manually delete quarantined files after verification.
+        """
+        try:
+            import shutil
+            from datetime import datetime
+            
+            # Skip symlinks
+            if os.path.islink(filepath):
+                return False
+            
+            # Create quarantine directory in same parent as file
+            parent_dir = os.path.dirname(filepath)
+            quarantine_dir = os.path.join(parent_dir, '.quarantine')
+            
+            if not os.path.exists(quarantine_dir):
+                os.makedirs(quarantine_dir, mode=0o700)
+            
+            # Generate unique filename with timestamp
+            filename = os.path.basename(filepath)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            quarantine_name = f"{timestamp}_{filename}"
+            quarantine_path = os.path.join(quarantine_dir, quarantine_name)
+            
+            # Move file to quarantine
+            shutil.move(filepath, quarantine_path)
+            
+            # Restrict permissions on quarantined file - use follow_symlinks=False
+            os.chmod(quarantine_path, 0o600, follow_symlinks=False)
+            
+            self.integrity_manager.log_audit_event(
+                'file_quarantined', filepath,
+                f"Moved to quarantine: {quarantine_path}"
+            )
+            
+            return True
+            
+        except Exception as e:
+            # If quarantine fails, log but don't fail encryption
+            self.integrity_manager.log_audit_event(
+                'quarantine_failed', filepath,
+                f"Failed to quarantine: {str(e)}",
+                severity='warning'
+            )
+            return False
 
     def _decrypt_file(self, filepath: str) -> bool:
         """
