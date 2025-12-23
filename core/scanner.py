@@ -231,8 +231,17 @@ class ScanThread(QThread):
             sensitivity = 'medium'
         elif any(pattern in filename for pattern in medium_sensitivity_patterns):
             sensitivity = 'medium'
+        # Ganti bagian elif is_symlink lama dengan ini:
         elif is_symlink:
-            sensitivity = 'medium'
+            try:
+                target = os.readlink(filepath)
+                # Jika symlink mengarah ke absolute path (sistem) atau parent directory (..)
+                if os.path.isabs(target) or '..' in target:
+                    sensitivity = 'high'  # Potensi path traversal / system file access
+                else:
+                    sensitivity = 'medium'
+            except OSError:
+                sensitivity = 'medium'
             
             # Symlink depth check: if target is system/sensitive path, mark as HIGH RISK
             try:

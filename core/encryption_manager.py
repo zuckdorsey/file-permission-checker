@@ -85,12 +85,13 @@ class EncryptionWorker(QObject):
             file_size = os.path.getsize(filepath)
             
             # Warn about large files that may cause memory issues
+            # Tambahkan di awal method _encrypt_file
+            MAX_FILE_SIZE = 500 * 1024 * 1024  # Batas 500MB
+
+            file_size = os.path.getsize(filepath)
             if file_size > MAX_FILE_SIZE:
-                size_mb = file_size / (1024 * 1024)
-                self.progress.emit(
-                    0, 
-                    f"⚠️ Large file ({size_mb:.1f}MB): {os.path.basename(filepath)} - may be slow"
-                )
+                self.error.emit(f"Skipping {os.path.basename(filepath)}: File too large ({file_size/1024/1024:.2f} MB). Max supported is 500MB.")
+                return False
             
             # Read file in chunks
             file_chunks = []
