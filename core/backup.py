@@ -12,7 +12,7 @@ from core.integrity import IntegrityManager
 
 
 class PermissionMetadata:
-    """Class to handle permission change metadata storage and retrieval."""
+    """Kelas untuk menangani penyimpanan dan pengambilan metadata perubahan izin."""
     
     def __init__(self, metadata_dir: str = "permission_logs"):
         self.metadata_dir = metadata_dir
@@ -20,14 +20,14 @@ class PermissionMetadata:
         self._ensure_dir()
     
     def _ensure_dir(self):
-        """Ensure metadata directory exists with secure permissions."""
+        """Pastikan direktori metadata ada dengan izin aman."""
         if not os.path.exists(self.metadata_dir):
             os.makedirs(self.metadata_dir, mode=0o700)
         if os.path.exists(self.metadata_file):
             os.chmod(self.metadata_file, 0o600)
     
     def _load_metadata(self) -> Dict:
-        """Load existing metadata from JSON file."""
+        """load metadata dari file json"""
         if os.path.exists(self.metadata_file):
             try:
                 with open(self.metadata_file, 'r') as f:
@@ -37,7 +37,7 @@ class PermissionMetadata:
         return {"changes": [], "summary": {}}
     
     def _save_metadata(self, data: Dict):
-        """Save metadata to JSON file with secure permissions."""
+        """simpan metadata ke file json"""
         with open(self.metadata_file, 'w') as f:
             json.dump(data, f, indent=2, default=str)
         os.chmod(self.metadata_file, 0o600)
@@ -52,18 +52,18 @@ class PermissionMetadata:
         user: str = None
     ) -> Dict:
         """
-        Log a permission change with full metadata.
+        Catat perubahan izin dengan metadata lengkap.
         
-        Args:
-            filepath: Absolute path to the file
-            old_permission: Original permission (octal string, e.g., '777')
-            new_permission: New permission (octal string, e.g., '644')
-            risk_level: Risk level of the file (High/Medium/Low)
-            reason: Reason for the change
-            user: User who made the change
+        Argumen:
+            filepath: Jalur absolut ke file
+            old_permission: Izin asli (string oktal, misalnya '777')
+            izin_baru: Izin baru (string oktal, misalnya '644')
+            risk_level: Tingkat risiko file (Tinggi/Sedang/Rendah)
+            alasan: Alasan perubahan
+            pengguna: Pengguna yang melakukan perubahan
         
-        Returns:
-            The logged change entry
+        Pengembalian:
+            Entri perubahan yang dicatat
         """
         metadata = self._load_metadata()
         
@@ -118,7 +118,7 @@ class PermissionMetadata:
         return change_entry
     
     def _octal_to_symbolic(self, octal_str: str) -> str:
-        """Convert octal permission string to symbolic format."""
+        """Ubah string izin oktal menjadi format simbolis."""
         try:
             mode = int(octal_str, 8)
             return stat.filemode(mode | stat.S_IFREG)[1:]
@@ -126,7 +126,7 @@ class PermissionMetadata:
             return "unknown"
     
     def get_file_history(self, filepath: str) -> List[Dict]:
-        """Get all permission changes for a specific file."""
+        """Dapatkan semua perubahan izin untuk file tertentu."""
         metadata = self._load_metadata()
         return [
             change for change in metadata["changes"]
@@ -134,7 +134,7 @@ class PermissionMetadata:
         ]
     
     def get_changes_by_date(self, start_date: str = None, end_date: str = None) -> List[Dict]:
-        """Get permission changes within a date range."""
+        """Dapatkan perubahan izin dalam rentang tanggal."""
         metadata = self._load_metadata()
         changes = metadata["changes"]
         
@@ -149,7 +149,7 @@ class PermissionMetadata:
         return changes
     
     def get_changes_by_risk_level(self, risk_level: str) -> List[Dict]:
-        """Get all changes for a specific risk level."""
+        """Dapatkan semua perubahan untuk tingkat risiko tertentu."""
         metadata = self._load_metadata()
         return [
             change for change in metadata["changes"]
@@ -157,17 +157,17 @@ class PermissionMetadata:
         ]
     
     def get_summary(self) -> Dict:
-        """Get summary statistics of all permission changes."""
+        """Dapatkan statistik ringkasan semua perubahan izin."""
         metadata = self._load_metadata()
         return metadata.get("summary", {})
     
     def get_all_changes(self) -> List[Dict]:
-        """Get all permission change records."""
+        """Dapatkan semua catatan perubahan izin."""
         metadata = self._load_metadata()
         return metadata.get("changes", [])
     
     def export_to_csv(self, output_path: str) -> bool:
-        """Export permission changes to CSV format."""
+        """Ekspor perubahan izin ke format CSV."""
         import csv
         
         metadata = self._load_metadata()
@@ -192,7 +192,7 @@ class PermissionMetadata:
             return False
     
     def can_revert(self, change_id: int) -> bool:
-        """Check if a permission change can be reverted."""
+        """Periksa apakah perubahan izin dapat dikembalikan."""
         metadata = self._load_metadata()
         for change in metadata["changes"]:
             if change["id"] == change_id:
@@ -200,7 +200,7 @@ class PermissionMetadata:
         return False
     
     def revert_change(self, change_id: int) -> Dict:
-        """Revert a specific permission change."""
+        """Kembalikan perubahan izin tertentu."""
         metadata = self._load_metadata()
         
         for change in metadata["changes"]:
@@ -294,14 +294,14 @@ class BackupManager:
         note: str = "Permission change backup"
     ) -> str:
         """
-        Create a backup specifically for permission changes.
+        Buat cadangan khusus untuk perubahan izin.
         
-        Args:
-            files_data: List of dicts with 'path', 'old_permission', 'new_permission', 'risk_level'
-            note: Description of the backup
+        Argumen:
+            files_data: Daftar dicts dengan 'path', 'old_permission', 'new_permission', 'risk_level'
+            catatan: Deskripsi cadangan
         
-        Returns:
-            Path to the backup manifest file
+        Pengembalian:
+            Jalur ke file manifes cadangan
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_name = f"permission_backup_{timestamp}.json"
@@ -347,9 +347,9 @@ class BackupManager:
             
     def restore_backup(self, backup_path: str, restore_dir: str) -> Dict:
         """
-        Restore backup with Zip Slip protection.
+        Pulihkan cadangan dengan perlindungan Zip Slip.
         
-        Validates all extraction paths to prevent directory traversal attacks.
+        Memvalidasi semua jalur ekstraksi untuk mencegah serangan traversal direktori.
         """
         try:
             if not os.path.exists(backup_path):
@@ -414,13 +414,13 @@ class BackupManager:
     
     def restore_permissions_from_backup(self, backup_path: str) -> Dict:
         """
-        Restore only permissions (not files) from a permission backup.
+        Pulihkan hanya izin (bukan file) dari cadangan izin.
         
-        Args:
-            backup_path: Path to permission backup JSON file
+        Argumen:
+            backup_path: Jalur ke izin file JSON cadangan
         
-        Returns:
-            Result dict with success status and details
+        Pengembalian:
+            Hasil dikte dengan status sukses dan detailnya
         """
         try:
             with open(backup_path, 'r') as f:
@@ -510,28 +510,28 @@ class BackupManager:
         return sorted(backups, key=lambda x: x['created'], reverse=True)
     
     def get_permission_history(self, filepath: str) -> List[Dict]:
-        """Get permission change history for a specific file."""
+        """Dapatkan riwayat perubahan izin untuk file tertentu."""
         return self.permission_metadata.get_file_history(filepath)
     
     def get_all_permission_changes(self) -> List[Dict]:
-        """Get all permission changes across all files."""
+        """Dapatkan semua perubahan izin di semua file."""
         return self.permission_metadata.get_all_changes()
     
     def get_permission_summary(self) -> Dict:
-        """Get summary of all permission changes."""
+        """Dapatkan ringkasan semua perubahan izin."""
         return self.permission_metadata.get_summary()
 
 
 class RestoreManager:
     """
-    Comprehensive restore manager for files and permissions.
+    Manajer pemulihan komprehensif untuk file dan izin.
     
-    Features:
-    - Restore file content from backup
-    - Restore original permissions
-    - Validate file existence
-    - Integrity verification
-    - Detailed restore reports
+    Fitur:
+    - Kembalikan konten file dari cadangan
+    - Kembalikan izin asli
+    - Validasi keberadaan file
+    - Verifikasi integritas
+    - Laporan pemulihan terperinci
     """
     
     def __init__(self, backup_dir: str = "backups"):
@@ -542,10 +542,10 @@ class RestoreManager:
     
     def validate_backup(self, backup_path: str) -> Dict:
         """
-        Validate a backup file before restore.
+        Validasi file cadangan sebelum memulihkan.
         
-        Returns:
-            Dict with validation status and details
+        Pengembalian:
+            Dikte dengan status validasi dan detailnya
         """
         result = {
             'valid': False,
@@ -623,14 +623,14 @@ class RestoreManager:
     
     def preview_restore(self, backup_path: str, restore_dir: str = None) -> Dict:
         """
-        Preview what will be restored without actually restoring.
+        Pratinjau apa yang akan dipulihkan tanpa benar-benar memulihkan.
         
-        Args:
-            backup_path: Path to backup file
-            restore_dir: Optional directory to restore to (for file backups)
+        Argumen:
+            backup_path: Jalur ke file cadangan
+            recovery_dir: Direktori opsional untuk memulihkan (untuk cadangan file)
         
-        Returns:
-            Dict with preview information
+        Pengembalian:
+            Dikte dengan informasi pratinjau
         """
         validation = self.validate_backup(backup_path)
         
@@ -699,17 +699,17 @@ class RestoreManager:
         create_dirs: bool = True
     ) -> Dict:
         """
-        Restore file contents and permissions from a backup.
+        Pulihkan konten file dan izin dari cadangan.
         
-        Args:
-            backup_path: Path to the backup file (.zip)
-            restore_dir: Directory to restore files to
-            overwrite: Whether to overwrite existing files
-            restore_permissions: Whether to restore original permissions
-            create_dirs: Whether to create missing directories
+        Argumen:
+            backup_path: Jalur ke file cadangan (.zip)
+            recovery_dir: Direktori untuk memulihkan file
+            overwrite: Apakah akan menimpa file yang sudah ada
+            recovery_permissions: Apakah akan mengembalikan izin asli
+            create_dirs: Apakah akan membuat direktori yang hilang
         
-        Returns:
-            Detailed restore result
+        Pengembalian:
+            Hasil pemulihan terperinci
         """
         result = {
             'success': False,
@@ -819,16 +819,16 @@ class RestoreManager:
         restore_permission: bool = True
     ) -> Dict:
         """
-        Restore a single file from a backup.
+        Pulihkan satu file dari cadangan.
         
-        Args:
-            backup_path: Path to backup file
-            filename: Name of file to restore
-            target_path: Optional target path (defaults to original location)
-            restore_permission: Whether to restore permission
+        Argumen:
+            backup_path: Jalur ke file cadangan
+            nama file: Nama file yang akan dipulihkan
+            target_path: Jalur target opsional (default ke lokasi asli)
+            recovery_permission: Apakah akan mengembalikan izin
         
-        Returns:
-            Restore result
+        Pengembalian:
+            Kembalikan hasil
         """
         result = {
             'success': False,
@@ -901,14 +901,14 @@ class RestoreManager:
         validate_exists: bool = True
     ) -> Dict:
         """
-        Restore only permissions (not file contents) from a backup.
+        Pulihkan hanya izin (bukan konten file) dari cadangan.
         
-        Args:
-            backup_path: Path to backup file (.zip or .json)
-            validate_exists: Skip files that don't exist
+        Argumen:
+            backup_path: Jalur ke file cadangan (.zip atau .json)
+            validasi_exists: Lewati file yang tidak ada
         
-        Returns:
-            Restore result
+        Pengembalian:
+            Kembalikan hasil
         """
         result = {
             'success': False,
@@ -980,7 +980,7 @@ class RestoreManager:
             return result
     
     def get_restore_history(self) -> List[Dict]:
-        """Get history of all restore operations."""
+        """mendapatkan semua history backup"""
         if os.path.exists(self.restore_log_file):
             try:
                 with open(self.restore_log_file, 'r') as f:
@@ -990,7 +990,7 @@ class RestoreManager:
         return []
     
     def _log_restore(self, backup_path: str, result: Dict):
-        """Log a restore operation."""
+        """mencatat log restore"""
         history = self.get_restore_history()
         
         history.append({

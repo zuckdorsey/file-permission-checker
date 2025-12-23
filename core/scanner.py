@@ -14,7 +14,7 @@ import os
 import stat
 from datetime import datetime
 from typing import Dict, Optional, List
-from PyQt5.QtCore import QThread, pyqtSignal, QMutex
+from PyQt6.QtCore import QThread, pyqtSignal, QMutex
 
 class ScanThread(QThread):
     progress = pyqtSignal(int, str)

@@ -10,16 +10,16 @@ r"""╔════════════════════════�
 ║  https://github.com/zuckdorsey                                                       ║
 ╚══════════════════════════════════════════════════════════════════╝"""
 
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton, QProgressBar, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QHBoxLayout, QFrame,
     QGraphicsDropShadowEffect, QSizePolicy, QHeaderView
 )
-from PyQt5.QtCore import (
+from PyQt6.QtCore import (
     Qt, QPropertyAnimation, QEasingCurve, pyqtProperty,
     QTimer, QSize, QPoint, QRect
 )
-from PyQt5.QtGui import (
+from PyQt6.QtGui import (
     QColor, QFont, QPainter, QPainterPath, QBrush,
     QLinearGradient, QPen, QIcon
 )
@@ -37,9 +37,9 @@ class GlassCard(QFrame):
     
     def _setup_style(self):
         self.setStyleSheet("""
-            QFrame
-                background:
-                border: 1px solid
+            QFrame#glassCard {
+                background: #1a1a1a;
+                border: 1px solid #333333;
                 border-radius: 8px;
             }
         """)
@@ -243,7 +243,7 @@ class PillBadge(QLabel):
             }}
         """)
         
-        self.setAlignment(Qt.AlignCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
     def set_risk_level(self, level: str):
         self.risk_level = level
@@ -302,7 +302,7 @@ class ModernTableWidget(QTableWidget):
     
     def _setup_headers(self):
         self.horizontalHeader().setStretchLastSection(True)
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.horizontalHeader().setMinimumSectionSize(80)
 
 
@@ -333,7 +333,7 @@ class RiskTableWidgetItem(QTableWidgetItem):
         
         self.setBackground(colors['bg'])
         self.setForeground(colors['fg'])
-        self.setTextAlignment(Qt.AlignCenter)
+        self.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         
         font = QFont('Segoe UI', 10)
         font.setBold(True)
@@ -508,7 +508,7 @@ class LoadingSpinner(QWidget):
     
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
         cx = self.width() / 2
         cy = self.height() / 2
@@ -536,7 +536,7 @@ class LoadingSpinner(QWidget):
 class ModernLineEdit(QWidget):
     
     def __init__(self, placeholder: str = "", parent=None):
-        from PyQt5.QtWidgets import QLineEdit
+        from PyQt6.QtWidgets import QLineEdit
         super().__init__(parent)
         
         layout = QVBoxLayout(self)
