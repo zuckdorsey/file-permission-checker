@@ -1,4 +1,4 @@
-"""╔══════════════════════════════════════════════════════════════════╗
+r"""╔══════════════════════════════════════════════════════════════════╗
 ║    ____                 _                      _                  ║
 ║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
 ║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
@@ -69,8 +69,12 @@ class EncryptionWorker(QObject):
         Original file is moved to .quarantine/ folder (NOT deleted).
         
         File format: [salt (16 bytes)] [verification_hash (32 bytes)] [encrypted_data]
+        
+        Note: Fernet doesn't support true streaming encryption, so files are
+        loaded into memory. Large files (>100MB) will show a warning.
         """
         CHUNK_SIZE = 64 * 1024  # 64KB chunks
+        MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB limit warning
         
         try:
             # Check if file is a symlink - prevent symlink attacks
@@ -78,9 +82,19 @@ class EncryptionWorker(QObject):
                 self.error.emit(f"Skipping symlink: {os.path.basename(filepath)}")
                 return False
             
-            # Read file in chunks for streaming
-            file_chunks = []
             file_size = os.path.getsize(filepath)
+            
+            # Warn about large files that may cause memory issues
+            if file_size > MAX_FILE_SIZE:
+                size_mb = file_size / (1024 * 1024)
+                self.progress.emit(
+                    0, 
+                    f"⚠️ Large file ({size_mb:.1f}MB): {os.path.basename(filepath)} - may be slow"
+                )
+            
+            # Read file in chunks
+            file_chunks = []
+            bytes_read = 0
             
             with open(filepath, 'rb') as f:
                 while True:
@@ -88,14 +102,22 @@ class EncryptionWorker(QObject):
                     if not chunk:
                         break
                     file_chunks.append(chunk)
+                    bytes_read += len(chunk)
+                    
+                    # Progress update for large files
+                    if file_size > MAX_FILE_SIZE:
+                        progress = int((bytes_read / file_size) * 50)  # 0-50% for reading
+                        self.progress.emit(progress, f"Reading {os.path.basename(filepath)}...")
             
-            # Combine chunks for encryption (Fernet needs complete data)
+            # Combine chunks for encryption (Fernet requires complete data)
             data = b''.join(file_chunks)
+            del file_chunks  # Free memory
             
             result = self.security_manager.encrypt_data(data, self.password)
             encrypted_data = result['data']
             salt = result['salt']
             verification_hash = result.get('verification_hash', b'')
+            del data  # Free memory after encryption
             
             enc_path = filepath + ".enc"
             
@@ -104,7 +126,6 @@ class EncryptionWorker(QObject):
                 f.write(salt)
                 f.write(verification_hash)
                 
-                # Write encrypted data in chunks
                 offset = 0
                 while offset < len(encrypted_data):
                     f.write(encrypted_data[offset:offset + CHUNK_SIZE])

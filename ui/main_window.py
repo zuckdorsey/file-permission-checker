@@ -1,4 +1,4 @@
-"""╔══════════════════════════════════════════════════════════════════╗
+r"""╔══════════════════════════════════════════════════════════════════╗
 ║    ____                 _                      _                  ║
 ║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
 ║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
@@ -145,9 +145,9 @@ class FilePermissionChecker(QMainWindow):
         self.header_widget = QFrame()
         self.header_widget.setObjectName("headerBar")
         self.header_widget.setStyleSheet("""
-            QFrame
-                background:
-                border-bottom: 1px solid
+            QFrame#headerBar {
+                background: #141414;
+                border-bottom: 1px solid #333333;
             }
         """)
         self.header_widget.setFixedHeight(60)
@@ -784,9 +784,23 @@ class FilePermissionChecker(QMainWindow):
                 break
 
     def show_toast(self, message: str, toast_type: str = "info"):
-        """Tampilkan notifikasi toast"""
+        """Show toast notification with stacking support."""
         toast = ToastNotification(message, toast_type, 3000, self)
-        toast.move(self.width() - toast.width() - 20, 80)
+        
+        # Calculate position based on existing toasts
+        if not hasattr(self, '_active_toasts'):
+            self._active_toasts = []
+        
+        # Clean up finished toasts
+        self._active_toasts = [t for t in self._active_toasts if t.isVisible()]
+        
+        # Stack new toast below existing ones
+        base_y = 80
+        for existing_toast in self._active_toasts:
+            base_y = max(base_y, existing_toast.y() + existing_toast.height() + 10)
+        
+        toast.move(self.width() - toast.width() - 20, base_y)
+        self._active_toasts.append(toast)
         toast.show()
 
     def browse_path(self):

@@ -1,4 +1,4 @@
-"""╔══════════════════════════════════════════════════════════════════╗
+r"""╔══════════════════════════════════════════════════════════════════╗
 ║    ____                 _                      _                  ║
 ║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
 ║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
@@ -37,9 +37,9 @@ class GlassCard(QFrame):
     
     def _setup_style(self):
         self.setStyleSheet("""
-            QFrame
-                background:
-                border: 1px solid
+            QFrame#glassCard {
+                background: #1a1a1a;
+                border: 1px solid #333333;
                 border-radius: 8px;
             }
         """)

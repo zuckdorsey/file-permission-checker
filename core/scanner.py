@@ -1,4 +1,4 @@
-"""╔══════════════════════════════════════════════════════════════════╗
+r"""╔══════════════════════════════════════════════════════════════════╗
 ║    ____                 _                      _                  ║
 ║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
 ║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
@@ -233,6 +233,32 @@ class ScanThread(QThread):
             sensitivity = 'medium'
         elif is_symlink:
             sensitivity = 'medium'
+            
+            # Symlink depth check: if target is system/sensitive path, mark as HIGH RISK
+            try:
+                target = os.readlink(filepath)
+                # Resolve relative symlinks
+                if not os.path.isabs(target):
+                    target = os.path.normpath(os.path.join(os.path.dirname(filepath), target))
+                
+                # List of system/sensitive paths
+                sensitive_system_paths = [
+                    '/etc', '/bin', '/sbin', '/usr/bin', '/usr/sbin',
+                    '/lib', '/lib64', '/usr/lib',
+                    '/root', '/var/log', '/var/run',
+                    '/boot', '/proc', '/sys', '/dev',
+                    '/home/root', '/.ssh', '/.gnupg',
+                    '/etc/passwd', '/etc/shadow', '/etc/sudoers',
+                ]
+                
+                # Check if symlink points to sensitive path
+                for sensitive_path in sensitive_system_paths:
+                    if target.startswith(sensitive_path) or sensitive_path in target:
+                        return 'High'  # Symlink to system path = HIGH RISK
+                        
+            except (OSError, ValueError):
+                # Can't resolve symlink, treat as medium risk
+                pass
         
         # Apply sensitivity + permission matrix
         if sensitivity == 'high':
