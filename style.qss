@@ -10,7 +10,7 @@ QMainWindow {
 
 QWidget {
     color: #e5e5e5;
-    background-color: transparent;
+    background-color: #0d0d0d;
 }
 
 /* ==================== MENU BAR ==================== */

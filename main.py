@@ -14,9 +14,9 @@ import sys
 import os
 from pathlib import Path
 
-from PyQt5.QtWidgets import QApplication, QSplashScreen
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QLinearGradient
+from PyQt6.QtWidgets import QApplication, QSplashScreen
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QPixmap, QFont, QPainter, QColor, QLinearGradient
 
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
@@ -26,48 +26,48 @@ from ui.main_window import FilePermissionChecker
 class ModernSplashScreen(QSplashScreen):    
     def __init__(self):
         pixmap = QPixmap(480, 320)
-        pixmap.fill(Qt.transparent)
+        pixmap.fill(Qt.GlobalColor.transparent)
 
         painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         painter.setBrush(QColor(13, 13, 13))
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
         painter.drawRoundedRect(0, 0, 480, 320, 12, 12)
 
         painter.setPen(QColor(31, 31, 31))
-        painter.setBrush(Qt.NoBrush)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawRoundedRect(1, 1, 478, 318, 12, 12)
 
         painter.setPen(QColor(229, 229, 229))
-        title_font = QFont('Inter', 22, QFont.DemiBold)
+        title_font = QFont('Inter', 22, QFont.Weight.DemiBold)
         if not title_font.exactMatch():
-            title_font = QFont('Segoe UI', 22, QFont.DemiBold)
+            title_font = QFont('Segoe UI', 22, QFont.Weight.DemiBold)
         painter.setFont(title_font)
-        painter.drawText(0, 110, 480, 40, Qt.AlignCenter, "File Permission Checker")
+        painter.drawText(0, 110, 480, 40, Qt.AlignmentFlag.AlignCenter, "File Permission Checker")
 
         subtitle_font = QFont('Inter', 12)
         if not subtitle_font.exactMatch():
             subtitle_font = QFont('Segoe UI', 12)
         painter.setFont(subtitle_font)
         painter.setPen(QColor(115, 115, 115))
-        painter.drawText(0, 155, 480, 24, Qt.AlignCenter, "Scan • Analyze • Secure")
+        painter.drawText(0, 155, 480, 24, Qt.AlignmentFlag.AlignCenter, "Scan • Analyze • Secure")
 
         version_font = QFont('Inter', 10)
         if not version_font.exactMatch():
             version_font = QFont('Segoe UI', 10)
         painter.setFont(version_font)
         painter.setPen(QColor(82, 82, 82))
-        painter.drawText(0, 190, 480, 20, Qt.AlignCenter, "v2.0")
+        painter.drawText(0, 190, 480, 20, Qt.AlignmentFlag.AlignCenter, "v2.0")
 
         painter.setBrush(QColor(26, 26, 26))
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
         painter.drawRoundedRect(140, 240, 200, 4, 2, 2)
 
         painter.end()
 
         super().__init__(pixmap)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         
         self._progress = 0
         self._loading_steps = [
@@ -82,7 +82,7 @@ class ModernSplashScreen(QSplashScreen):
     def showMessage(self, message: str):
         super().showMessage(
             message,
-            Qt.AlignBottom | Qt.AlignHCenter,
+            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter,
             QColor(115, 115, 115)
         )
 
@@ -110,9 +110,7 @@ def load_styles(app: QApplication):
         """)
 
 def main():
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
-
+    # PyQt6 handles High DPI scaling automatically
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
     app.setApplicationName("File Permission Checker")
@@ -155,7 +153,7 @@ def main():
     window.show()
     splash.finish(window)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 if __name__ == '__main__':
     main()

@@ -20,16 +20,16 @@ from datetime import datetime, date
 from typing import List, Dict
 from pathlib import Path
 
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem,
     QFileDialog, QMessageBox, QHeaderView, QProgressBar,
     QStatusBar, QComboBox, QCheckBox, QGroupBox,
-    QAbstractItemView, QShortcut, QGridLayout, QFrame, QApplication,
+    QAbstractItemView, QGridLayout, QFrame, QApplication,
     QTabWidget, QListWidget, QListWidgetItem
 )
-from PyQt5.QtCore import Qt, QTimer, QSize
-from PyQt5.QtGui import QColor, QFont, QKeySequence, QDragEnterEvent, QDropEvent, QIcon
+from PyQt6.QtCore import Qt, QTimer, QSize
+from PyQt6.QtGui import QColor, QFont, QKeySequence, QShortcut, QDragEnterEvent, QDropEvent, QIcon
 
 from core.scanner import ScanThread
 from core.permission_fixer import PermissionFixer
@@ -109,13 +109,13 @@ class FilePermissionChecker(QMainWindow):
         self.tabs = QTabWidget()
         self.tabs.setStyleSheet("""
             QTabWidget::pane {
-                border: 1px solid
+                border: 1px solid #333333;
                 border-radius: 6px;
-                background:
+                background: #1a1a1a;
             }
             QTabBar::tab {
                 background: transparent;
-                color:
+                color: #a3a3a3;
                 padding: 10px 20px;
                 border: none;
                 border-bottom: 2px solid transparent;
@@ -123,11 +123,11 @@ class FilePermissionChecker(QMainWindow):
                 font-weight: 500;
             }
             QTabBar::tab:selected {
-                color:
-                border-bottom: 2px solid
+                color: #e5e5e5;
+                border-bottom: 2px solid #525252;
             }
             QTabBar::tab:hover:!selected {
-                color:
+                color: #d4d4d4;
             }
         """)
         
@@ -145,9 +145,9 @@ class FilePermissionChecker(QMainWindow):
         self.header_widget = QFrame()
         self.header_widget.setObjectName("headerBar")
         self.header_widget.setStyleSheet("""
-            QFrame
-                background:
-                border-bottom: 1px solid
+            QFrame#headerBar {
+                background: #141414;
+                border-bottom: 1px solid #333333;
             }
         """)
         self.header_widget.setFixedHeight(60)
@@ -216,7 +216,7 @@ class FilePermissionChecker(QMainWindow):
         
         version_label = QLabel("v2.0")
         version_label.setStyleSheet("color: #525252; font-size: 11px; text-align: center;")
-        version_label.setAlignment(Qt.AlignCenter)
+        version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         sidebar_layout.addWidget(version_label)
     
     def _create_stat_item(self, title: str, value: str, color: str) -> QFrame:
@@ -294,10 +294,10 @@ class FilePermissionChecker(QMainWindow):
             "📄 Name", "📁 Path", "🔢 Mode", "🔣 Symbolic", 
             "⚠️ Risk", "🎯 Expected", "📊 Size", "📅 Modified"
         ])
-        self.file_table.setSelectionBehavior(QTableWidget.SelectRows)
-        self.file_table.setSelectionMode(QTableWidget.MultiSelection)
+        self.file_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.file_table.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self.file_table.setSortingEnabled(True)
-        self.file_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.file_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.file_table.itemSelectionChanged.connect(self.update_selection_count)
         scan_layout.addWidget(self.file_table, 1)
         
@@ -383,7 +383,7 @@ class FilePermissionChecker(QMainWindow):
         pass_label.setStyleSheet("font-weight: 600; color: #e5e5e5;")
         
         self.enc_pass_input = QLineEdit()
-        self.enc_pass_input.setEchoMode(QLineEdit.Password)
+        self.enc_pass_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.enc_pass_input.setPlaceholderText("Enter secure password...")
         self.enc_pass_input.textChanged.connect(self._update_password_strength)
         
@@ -429,7 +429,7 @@ class FilePermissionChecker(QMainWindow):
         list_layout.addWidget(list_label)
         
         self.enc_file_list = QListWidget()
-        self.enc_file_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.enc_file_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.enc_file_list.itemSelectionChanged.connect(self._update_enc_file_count)
         list_layout.addWidget(self.enc_file_list)
         
@@ -501,7 +501,7 @@ class FilePermissionChecker(QMainWindow):
         """Add individual files to the encryption queue."""
         files, _ = QFileDialog.getOpenFileNames(self, "Select Files to Process")
         for f in files:
-            if not self.enc_file_list.findItems(f, Qt.MatchExactly):
+            if not self.enc_file_list.findItems(f, Qt.MatchFlag.MatchExactly):
                 self.enc_file_list.addItem(f)
         self._update_enc_file_count()
             
@@ -549,10 +549,10 @@ class FilePermissionChecker(QMainWindow):
     def _toggle_password_visibility(self):
         """Toggle password field visibility."""
         if self.show_pass_btn.isChecked():
-            self.enc_pass_input.setEchoMode(QLineEdit.Normal)
+            self.enc_pass_input.setEchoMode(QLineEdit.EchoMode.Normal)
             self.show_pass_btn.setText("Hide")
         else:
-            self.enc_pass_input.setEchoMode(QLineEdit.Password)
+            self.enc_pass_input.setEchoMode(QLineEdit.EchoMode.Password)
             self.show_pass_btn.setText("Show")
     
     def _generate_password(self):
@@ -569,7 +569,7 @@ class FilePermissionChecker(QMainWindow):
     
     def _copy_password(self):
         """Copy password to clipboard."""
-        from PyQt5.QtWidgets import QApplication
+        from PyQt6.QtWidgets import QApplication
         
         password = self.enc_pass_input.text()
         if not password:
@@ -667,8 +667,8 @@ class FilePermissionChecker(QMainWindow):
         self.backup_table = ModernTableWidget()
         self.backup_table.setColumnCount(4)
         self.backup_table.setHorizontalHeaderLabels(["Name", "Date", "Size", "Files"])
-        self.backup_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.backup_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.backup_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.backup_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         hist_layout.addWidget(self.backup_table)
         
         actions = QHBoxLayout()
@@ -723,7 +723,7 @@ class FilePermissionChecker(QMainWindow):
             self.backup_table.setItem(row, 1, QTableWidgetItem(b['created'].strftime('%Y-%m-%d %H:%M')))
             self.backup_table.setItem(row, 2, QTableWidgetItem(format_size(b['size'])))
             self.backup_table.setItem(row, 3, QTableWidgetItem(str(b['file_count'])))
-            self.backup_table.item(row, 0).setData(Qt.UserRole, b['path'])
+            self.backup_table.item(row, 0).setData(Qt.ItemDataRole.UserRole, b['path'])
             
     def restore_backup(self):
         row = self.backup_table.currentRow()
@@ -731,7 +731,7 @@ class FilePermissionChecker(QMainWindow):
             self.show_toast("Select a backup to restore", "warning")
             return
             
-        backup_path = self.backup_table.item(row, 0).data(Qt.UserRole)
+        backup_path = self.backup_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
         dest = QFileDialog.getExistingDirectory(self, "Restore Destination")
         if dest:
             res = self.backup_manager.restore_backup(backup_path, dest)
@@ -831,7 +831,7 @@ class FilePermissionChecker(QMainWindow):
         self.file_table.setItem(row, 4, RiskTableWidgetItem(file_data['risk'], file_data['risk']))
         self.file_table.setItem(row, 5, QTableWidgetItem(file_data['expected'] or '-'))
         size_item = QTableWidgetItem(format_size(file_data['info']['size']))
-        size_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        size_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.file_table.setItem(row, 6, size_item)
         self.file_table.setItem(row, 7, QTableWidgetItem(file_data['info']['modified'].strftime('%Y-%m-%d %H:%M')))
 
@@ -901,13 +901,13 @@ class FilePermissionChecker(QMainWindow):
             f"⚠️ Medium Risk: {sum(1 for f in risky_files if f['risk'] == 'Medium')}\n\n"
             "Choose repair method:"
         )
-        msg.setIcon(QMessageBox.Warning)
+        msg.setIcon(QMessageBox.Icon.Warning)
         
-        quick_btn = msg.addButton("⚡ Quick Fix (Auto)", QMessageBox.AcceptRole)
-        adv_btn = msg.addButton("⚙️ Advanced...", QMessageBox.ActionRole)
-        cancel_btn = msg.addButton(QMessageBox.Cancel)
+        quick_btn = msg.addButton("⚡ Quick Fix (Auto)", QMessageBox.ButtonRole.AcceptRole)
+        adv_btn = msg.addButton("⚙️ Advanced...", QMessageBox.ButtonRole.ActionRole)
+        cancel_btn = msg.addButton(QMessageBox.StandardButton.Cancel)
         
-        msg.exec_()
+        msg.exec()
         
         if msg.clickedButton() == quick_btn:
             self._apply_fixes(risky_files)
@@ -927,7 +927,7 @@ class FilePermissionChecker(QMainWindow):
     def _open_advanced_fix_dialog(self, files: List[dict]):
         """Buka dialog izin lanjutan"""
         dialog = AdvancedPermissionDialog(self, len(files))
-        if dialog.exec_():
+        if dialog.exec():
             settings = dialog.get_settings()
             self._apply_fixes(files, settings)
         
@@ -1052,4 +1052,4 @@ class FilePermissionChecker(QMainWindow):
         self.integrity_manager.log_audit_event('application_closed', details='Application closed normally')
         event.accept()
 
-from PyQt5.QtCore import QThread
+from PyQt6.QtCore import QThread

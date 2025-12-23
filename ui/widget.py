@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QLabel, QProgressBar, QTableWidgetItem
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QFont
+from PyQt6.QtWidgets import QLabel, QProgressBar, QTableWidgetItem
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QFont
 
 
 class StatusLabel(QLabel):
@@ -158,7 +158,7 @@ class RiskTableWidgetItem(QTableWidgetItem):
         
         self.setBackground(colors['bg'])
         self.setForeground(colors['fg'])
-        self.setTextAlignment(Qt.AlignCenter)
+        self.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         
         font = QFont('Segoe UI', 10)
         font.setBold(True)
@@ -200,7 +200,7 @@ class InfoBadge(QLabel):
                 font-size: 11px;
             }}
         """)
-        self.setAlignment(Qt.AlignCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
     def set_type(self, badge_type: str):
         self.badge_type = badge_type

@@ -14,7 +14,7 @@ import os
 import threading
 import queue
 from pathlib import Path
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
+from PyQt6.QtCore import QThread, pyqtSignal, QObject
 
 from core.security import SecurityManager
 from core.secure_memory import SecureString, secure_delete_file
@@ -63,15 +63,15 @@ class EncryptionWorker(QObject):
 
     def _encrypt_file(self, filepath: str) -> bool:
         """
-        Encrypt a file with streaming buffer for large files.
+        Enkripsi file dengan buffer streaming untuk file besar.
         
-        Uses chunked read/write to prevent memory exhaustion on large files.
-        Original file is moved to .quarantine/ folder (NOT deleted).
+        Menggunakan potongan baca/tulis untuk mencegah kehabisan memori pada file besar.
+        File asli dipindahkan ke folder .quarantine/ (TIDAK dihapus).
         
-        File format: [salt (16 bytes)] [verification_hash (32 bytes)] [encrypted_data]
+        Format file: [garam (16 byte)] [verifikasi_hash (32 byte)] [data_terenkripsi]
         
-        Note: Fernet doesn't support true streaming encryption, so files are
-        loaded into memory. Large files (>100MB) will show a warning.
+        Catatan: Fernet tidak mendukung enkripsi streaming yang sebenarnya, begitu pula file
+        dimuat ke dalam memori. File besar (>100MB) akan menampilkan peringatan.
         """
         CHUNK_SIZE = 64 * 1024
         MAX_FILE_SIZE = 100 * 1024 * 1024
@@ -140,9 +140,9 @@ class EncryptionWorker(QObject):
     
     def _quarantine_file(self, filepath: str) -> bool:
         """
-        Move file to .quarantine folder instead of deleting.
+        Pindahkan file ke folder .quarantine alih-alih menghapus.
         
-        User can manually delete quarantined files after verification.
+        Pengguna dapat menghapus file yang dikarantina secara manual setelah verifikasi.
         """
         try:
             import shutil
@@ -183,11 +183,11 @@ class EncryptionWorker(QObject):
 
     def _decrypt_file(self, filepath: str) -> bool:
         """
-        Decrypt a file with password verification.
+        Dekripsi file dengan verifikasi kata sandi.
         
-        Raises:
-            InvalidPasswordError: If password is wrong
-            DecryptionError: If decryption fails
+        Menaikkan:
+            InvalidPasswordError: Jika kata sandi salah
+            DecryptionError: Jika dekripsi gagal
         """
         from core.security import InvalidPasswordError, DecryptionError, DecryptionRateLimitError
         

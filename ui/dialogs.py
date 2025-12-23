@@ -1,11 +1,11 @@
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, 
     QPushButton, QCheckBox, QGroupBox, QGridLayout, QDialogButtonBox,
     QTextEdit, QComboBox, QRadioButton, QButtonGroup, QFrame,
     QWidget, QGraphicsDropShadowEffect
 )
-from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve
-from PyQt5.QtGui import QColor, QFont
+from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve
+from PyQt6.QtGui import QColor, QFont
 
 
 class ModernDialog(QDialog):
@@ -127,7 +127,7 @@ class PasswordDialog(ModernDialog):
         layout.addWidget(pass_label)
         
         self.password_input = QLineEdit()
-        self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_input.setPlaceholderText("Enter your password")
         self.password_input.setMinimumHeight(40)
         layout.addWidget(self.password_input)
@@ -137,7 +137,7 @@ class PasswordDialog(ModernDialog):
         layout.addWidget(confirm_label)
         
         self.confirm_input = QLineEdit()
-        self.confirm_input.setEchoMode(QLineEdit.Password)
+        self.confirm_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.confirm_input.setPlaceholderText("Confirm your password")
         self.confirm_input.setMinimumHeight(40)
         layout.addWidget(self.confirm_input)
@@ -172,7 +172,7 @@ class PasswordDialog(ModernDialog):
         layout.addLayout(btn_layout)
     
     def toggle_password_visibility(self, checked):
-        mode = QLineEdit.Normal if checked else QLineEdit.Password
+        mode = QLineEdit.EchoMode.Normal if checked else QLineEdit.EchoMode.Password
         self.password_input.setEchoMode(mode)
         self.confirm_input.setEchoMode(mode)
     
@@ -236,15 +236,15 @@ class AdvancedPermissionDialog(ModernDialog):
         
         read_header = QLabel("Read")
         read_header.setStyleSheet("font-weight: 500; color: #4ade80;")
-        visual_layout.addWidget(read_header, 0, 1, Qt.AlignCenter)
+        visual_layout.addWidget(read_header, 0, 1, Qt.AlignmentFlag.AlignCenter)
         
         write_header = QLabel("Write")
         write_header.setStyleSheet("font-weight: 500; color: #fbbf24;")
-        visual_layout.addWidget(write_header, 0, 2, Qt.AlignCenter)
+        visual_layout.addWidget(write_header, 0, 2, Qt.AlignmentFlag.AlignCenter)
         
         exec_header = QLabel("Execute")
         exec_header.setStyleSheet("font-weight: 500; color: #f87171;")
-        visual_layout.addWidget(exec_header, 0, 3, Qt.AlignCenter)
+        visual_layout.addWidget(exec_header, 0, 3, Qt.AlignmentFlag.AlignCenter)
         
         user_label = QLabel("Owner")
         user_label.setStyleSheet("font-weight: 500;")
@@ -256,9 +256,9 @@ class AdvancedPermissionDialog(ModernDialog):
         self.user_write.setChecked(True)
         self.user_execute = QCheckBox()
         
-        visual_layout.addWidget(self.user_read, 1, 1, Qt.AlignCenter)
-        visual_layout.addWidget(self.user_write, 1, 2, Qt.AlignCenter)
-        visual_layout.addWidget(self.user_execute, 1, 3, Qt.AlignCenter)
+        visual_layout.addWidget(self.user_read, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        visual_layout.addWidget(self.user_write, 1, 2, Qt.AlignmentFlag.AlignCenter)
+        visual_layout.addWidget(self.user_execute, 1, 3, Qt.AlignmentFlag.AlignCenter)
         
         group_label = QLabel("Group")
         group_label.setStyleSheet("font-weight: 500;")
@@ -269,9 +269,9 @@ class AdvancedPermissionDialog(ModernDialog):
         self.group_write = QCheckBox()
         self.group_execute = QCheckBox()
         
-        visual_layout.addWidget(self.group_read, 2, 1, Qt.AlignCenter)
-        visual_layout.addWidget(self.group_write, 2, 2, Qt.AlignCenter)
-        visual_layout.addWidget(self.group_execute, 2, 3, Qt.AlignCenter)
+        visual_layout.addWidget(self.group_read, 2, 1, Qt.AlignmentFlag.AlignCenter)
+        visual_layout.addWidget(self.group_write, 2, 2, Qt.AlignmentFlag.AlignCenter)
+        visual_layout.addWidget(self.group_execute, 2, 3, Qt.AlignmentFlag.AlignCenter)
         
         others_label = QLabel("Others")
         others_label.setStyleSheet("font-weight: 500;")
@@ -282,9 +282,9 @@ class AdvancedPermissionDialog(ModernDialog):
         self.others_write = QCheckBox()
         self.others_execute = QCheckBox()
         
-        visual_layout.addWidget(self.others_read, 3, 1, Qt.AlignCenter)
-        visual_layout.addWidget(self.others_write, 3, 2, Qt.AlignCenter)
-        visual_layout.addWidget(self.others_execute, 3, 3, Qt.AlignCenter)
+        visual_layout.addWidget(self.others_read, 3, 1, Qt.AlignmentFlag.AlignCenter)
+        visual_layout.addWidget(self.others_write, 3, 2, Qt.AlignmentFlag.AlignCenter)
+        visual_layout.addWidget(self.others_execute, 3, 3, Qt.AlignmentFlag.AlignCenter)
         
         self.visual_editor_group.setLayout(visual_layout)
         layout.addWidget(self.visual_editor_group)
@@ -489,11 +489,11 @@ class AdvancedPermissionDialog(ModernDialog):
         permission = self.permission_input.text()
         symbolic = self.get_symbolic_permission(permission)
         
-        from PyQt5.QtWidgets import QMessageBox
+        from PyQt6.QtWidgets import QMessageBox
         
         msg = QMessageBox(self)
         msg.setWindowTitle("Preview")
-        msg.setIcon(QMessageBox.Information)
+        msg.setIcon(QMessageBox.Icon.Information)
         msg.setText(f"""
 📋 Operation Preview
 
@@ -508,7 +508,7 @@ class AdvancedPermissionDialog(ModernDialog):
 
 ⚠️ Note: Changes cannot be undone automatically.
         """)
-        msg.exec_()
+        msg.exec()
     
     def get_symbolic_permission(self, permission: str) -> str:
         if len(permission) != 3:
@@ -822,7 +822,7 @@ class ConfirmationDialog(ModernDialog):
             severity="danger",
             confirm_text="Delete Permanently"
         )
-        return dialog.exec_() == QDialog.Accepted
+        return dialog.exec() == QDialog.DialogCode.Accepted
     
     @staticmethod
     def confirm_mass_permission_change(parent, file_count: int, new_permission: str):
@@ -835,7 +835,7 @@ class ConfirmationDialog(ModernDialog):
             severity="warning",
             confirm_text="Apply Changes"
         )
-        return dialog.exec_() == QDialog.Accepted
+        return dialog.exec() == QDialog.DialogCode.Accepted
     
     @staticmethod
     def confirm_clear_quarantine(parent, file_count: int):
@@ -848,4 +848,4 @@ class ConfirmationDialog(ModernDialog):
             severity="danger",
             confirm_text="Clear Quarantine"
         )
-        return dialog.exec_() == QDialog.Accepted
+        return dialog.exec() == QDialog.DialogCode.Accepted
