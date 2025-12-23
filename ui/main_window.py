@@ -145,9 +145,9 @@ class FilePermissionChecker(QMainWindow):
         self.header_widget = QFrame()
         self.header_widget.setObjectName("headerBar")
         self.header_widget.setStyleSheet("""
-            QFrame#headerBar {
-                background: #141414;
-                border-bottom: 1px solid #333333;
+            QFrame
+                background:
+                border-bottom: 1px solid
             }
         """)
         self.header_widget.setFixedHeight(60)
@@ -167,19 +167,16 @@ class FilePermissionChecker(QMainWindow):
         
         header_layout.addStretch()
         
-        # Primary action buttons with high visual contrast
         scan_btn = ModernButton("Analyze Permissions", style="primary")
         scan_btn.setToolTip("Scan folder for permission vulnerabilities (Ctrl+S)")
         scan_btn.clicked.connect(lambda: self.tabs.setCurrentIndex(0) or self.start_scan())
         header_layout.addWidget(scan_btn)
         
-        # Store reference for dynamic updates
         self.fix_risky_btn = ModernButton("Harden Permissions", style="warning")
         self.fix_risky_btn.setToolTip("Apply permission hardening to risky files (Ctrl+F)")
         self.fix_risky_btn.clicked.connect(self.fix_permissions)
         header_layout.addWidget(self.fix_risky_btn)
         
-        # Secondary action - lower contrast
         export_csv_btn = ModernButton("Export Report", style="secondary")
         export_csv_btn.setToolTip("Export scan results as CSV (Ctrl+E)")
         export_csv_btn.clicked.connect(lambda: self.export_results('csv'))
@@ -279,7 +276,6 @@ class FilePermissionChecker(QMainWindow):
         browse_btn.clicked.connect(self.browse_path)
         top_layout.addWidget(browse_btn)
         
-        # Primary scanner action
         scan_btn = ModernButton("Analyze Folder", style="primary")
         scan_btn.setToolTip("Scan folder for permission vulnerabilities (Ctrl+S or F5)")
         scan_btn.clicked.connect(self.start_scan)
@@ -301,7 +297,7 @@ class FilePermissionChecker(QMainWindow):
         self.file_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.file_table.setSelectionMode(QTableWidget.MultiSelection)
         self.file_table.setSortingEnabled(True)
-        self.file_table.setEditTriggers(QTableWidget.NoEditTriggers)  # Read-only
+        self.file_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.file_table.itemSelectionChanged.connect(self.update_selection_count)
         scan_layout.addWidget(self.file_table, 1)
         
@@ -339,7 +335,6 @@ class FilePermissionChecker(QMainWindow):
         
         bottom_layout.addSpacing(15)
         
-        # Store reference for dynamic quantitative updates
         self.fix_selected_btn = ModernButton("Harden Selected", style="warning")
         self.fix_selected_btn.setToolTip("Apply permission hardening to selected files (Ctrl+F)")
         self.fix_selected_btn.clicked.connect(self.fix_selected_permissions)
@@ -356,19 +351,16 @@ class FilePermissionChecker(QMainWindow):
         layout = QVBoxLayout(enc_tab)
         layout.setContentsMargins(5, 5, 5, 5)
         
-        # Mode Selection Card
         ctrl_card = GlassCard()
         ctrl_layout = QVBoxLayout(ctrl_card)
         
         mode_layout = QHBoxLayout()
-        # Encrypt button - GREEN when active
         self.enc_mode_btn = ModernButton("🔒 Encrypt Mode", style="encrypt")
         self.enc_mode_btn.setToolTip("Encrypt plaintext files to secure ciphertext")
         self.enc_mode_btn.setCheckable(True)
         self.enc_mode_btn.setChecked(True)
         self.enc_mode_btn.clicked.connect(lambda: self.toggle_enc_mode('encrypt'))
         
-        # Decrypt button - BLUE when active (starts inactive)
         self.dec_mode_btn = ModernButton("🔓 Decrypt Mode", style="secondary")
         self.dec_mode_btn.setToolTip("Decrypt .enc ciphertext files to plaintext")
         self.dec_mode_btn.setCheckable(True)
@@ -381,13 +373,11 @@ class FilePermissionChecker(QMainWindow):
         
         ctrl_layout.addSpacing(10)
         
-        # Password Section
         pass_group = QFrame()
         pass_group.setStyleSheet("QFrame { background: rgba(30, 30, 40, 0.5); border-radius: 8px; padding: 8px; }")
         pass_group_layout = QVBoxLayout(pass_group)
         pass_group_layout.setSpacing(8)
         
-        # Password input row
         pass_layout = QHBoxLayout()
         pass_label = QLabel("Password:")
         pass_label.setStyleSheet("font-weight: 600; color: #e5e5e5;")
@@ -407,7 +397,6 @@ class FilePermissionChecker(QMainWindow):
         pass_layout.addWidget(self.show_pass_btn)
         pass_group_layout.addLayout(pass_layout)
         
-        # Password tools row (hidden in decrypt mode)
         self.pass_tools_widget = QWidget()
         tools_layout = QHBoxLayout(self.pass_tools_widget)
         tools_layout.setContentsMargins(0, 0, 0, 0)
@@ -424,7 +413,6 @@ class FilePermissionChecker(QMainWindow):
         tools_layout.addWidget(copy_btn)
         tools_layout.addStretch()
         
-        # Password strength indicator
         self.pass_strength_label = QLabel("Strength: --")
         self.pass_strength_label.setStyleSheet("color: #a3a3a3; font-size: 12px;")
         tools_layout.addWidget(self.pass_strength_label)
@@ -434,7 +422,6 @@ class FilePermissionChecker(QMainWindow):
         
         layout.addWidget(ctrl_card)
         
-        # File List Card
         list_card = GlassCard()
         list_layout = QVBoxLayout(list_card)
         list_label = QLabel("Files & Folders to Process:")
@@ -446,7 +433,6 @@ class FilePermissionChecker(QMainWindow):
         self.enc_file_list.itemSelectionChanged.connect(self._update_enc_file_count)
         list_layout.addWidget(self.enc_file_list)
         
-        # Action buttons row
         action_layout = QHBoxLayout()
         
         add_file_btn = ModernButton("Add Files", style="secondary")
@@ -465,7 +451,6 @@ class FilePermissionChecker(QMainWindow):
         clear_btn.setToolTip("Clear entire file queue")
         clear_btn.clicked.connect(lambda: self.enc_file_list.clear() or self._update_enc_file_count())
         
-        # Process button - starts with encrypt style (GREEN)
         self.enc_process_btn = ModernButton("🔒 Encrypt Files", style="encrypt")
         self.enc_process_btn.setToolTip("Begin encryption process")
         self.enc_process_btn.clicked.connect(self.enc_process)
@@ -491,17 +476,13 @@ class FilePermissionChecker(QMainWindow):
         self.enc_mode_btn.setChecked(mode == 'encrypt')
         self.dec_mode_btn.setChecked(mode == 'decrypt')
         
-        # Use distinct colors: encrypt=green, decrypt=blue
         self.enc_mode_btn.update_style('encrypt' if mode == 'encrypt' else 'secondary')
         self.dec_mode_btn.update_style('decrypt' if mode == 'decrypt' else 'secondary')
         
-        # Update process button style based on mode
         self.enc_process_btn.update_style('encrypt' if mode == 'encrypt' else 'decrypt')
         
-        # Show/hide password generator (only needed in encrypt mode)
         self.pass_tools_widget.setVisible(mode == 'encrypt')
         
-        # State-aware label updates with clear mode indicator
         file_count = self.enc_file_list.count()
         if mode == 'encrypt':
             if file_count > 0:
@@ -520,7 +501,6 @@ class FilePermissionChecker(QMainWindow):
         """Add individual files to the encryption queue."""
         files, _ = QFileDialog.getOpenFileNames(self, "Select Files to Process")
         for f in files:
-            # Avoid duplicates
             if not self.enc_file_list.findItems(f, Qt.MatchExactly):
                 self.enc_file_list.addItem(f)
         self._update_enc_file_count()
@@ -539,7 +519,6 @@ class FilePermissionChecker(QMainWindow):
         
         file_count = 0
         for root, dirs, files in os.walk(folder):
-            # Skip hidden folders
             dirs[:] = [d for d in dirs if not d.startswith('.')]
             for file in files:
                 if not file.startswith('.'):
@@ -581,7 +560,6 @@ class FilePermissionChecker(QMainWindow):
         password = self.security_manager.generate_secure_password(20)
         self.enc_pass_input.setText(password)
         
-        # Show password temporarily
         self.enc_pass_input.setEchoMode(QLineEdit.Normal)
         self.show_pass_btn.setChecked(True)
         self.show_pass_btn.setText("Hide")
@@ -614,7 +592,6 @@ class FilePermissionChecker(QMainWindow):
         strength = result['strength']
         score = result['score']
         
-        # Color based on score
         colors = {
             0: "#ef4444", 1: "#ef4444", 2: "#f59e0b",
             3: "#eab308", 4: "#22c55e", 5: "#10b981", 6: "#059669"
@@ -691,7 +668,7 @@ class FilePermissionChecker(QMainWindow):
         self.backup_table.setColumnCount(4)
         self.backup_table.setHorizontalHeaderLabels(["Name", "Date", "Size", "Files"])
         self.backup_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.backup_table.setEditTriggers(QTableWidget.NoEditTriggers)  # Read-only
+        self.backup_table.setEditTriggers(QTableWidget.NoEditTriggers)
         hist_layout.addWidget(self.backup_table)
         
         actions = QHBoxLayout()
@@ -787,14 +764,11 @@ class FilePermissionChecker(QMainWindow):
         """Show toast notification with stacking support."""
         toast = ToastNotification(message, toast_type, 3000, self)
         
-        # Calculate position based on existing toasts
         if not hasattr(self, '_active_toasts'):
             self._active_toasts = []
         
-        # Clean up finished toasts
         self._active_toasts = [t for t in self._active_toasts if t.isVisible()]
         
-        # Stack new toast below existing ones
         base_y = 80
         for existing_toast in self._active_toasts:
             base_y = max(base_y, existing_toast.y() + existing_toast.height() + 10)
@@ -902,7 +876,6 @@ class FilePermissionChecker(QMainWindow):
         count = len(set(item.row() for item in self.file_table.selectedItems()))
         self.selected_count_label.setText(f"Selected: {count}")
         
-        # Quantitative feedback on fix button
         if count > 0:
             self.fix_selected_btn.setText(f"Harden {count} Selected")
         else:

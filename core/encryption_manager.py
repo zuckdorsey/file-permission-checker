@@ -73,27 +73,23 @@ class EncryptionWorker(QObject):
         Note: Fernet doesn't support true streaming encryption, so files are
         loaded into memory. Large files (>100MB) will show a warning.
         """
-        CHUNK_SIZE = 64 * 1024  # 64KB chunks
-        MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB limit warning
+        CHUNK_SIZE = 64 * 1024
+        MAX_FILE_SIZE = 100 * 1024 * 1024
         
         try:
-            # Check if file is a symlink - prevent symlink attacks
             if os.path.islink(filepath):
                 self.error.emit(f"Skipping symlink: {os.path.basename(filepath)}")
                 return False
             
             file_size = os.path.getsize(filepath)
             
-            # Warn about large files that may cause memory issues
-            # Tambahkan di awal method _encrypt_file
-            MAX_FILE_SIZE = 500 * 1024 * 1024  # Batas 500MB
+            MAX_FILE_SIZE = 500 * 1024 * 1024
 
             file_size = os.path.getsize(filepath)
             if file_size > MAX_FILE_SIZE:
                 self.error.emit(f"Skipping {os.path.basename(filepath)}: File too large ({file_size/1024/1024:.2f} MB). Max supported is 500MB.")
                 return False
             
-            # Read file in chunks
             file_chunks = []
             bytes_read = 0
             
@@ -105,24 +101,21 @@ class EncryptionWorker(QObject):
                     file_chunks.append(chunk)
                     bytes_read += len(chunk)
                     
-                    # Progress update for large files
                     if file_size > MAX_FILE_SIZE:
-                        progress = int((bytes_read / file_size) * 50)  # 0-50% for reading
+                        progress = int((bytes_read / file_size) * 50)
                         self.progress.emit(progress, f"Reading {os.path.basename(filepath)}...")
             
-            # Combine chunks for encryption (Fernet requires complete data)
             data = b''.join(file_chunks)
-            del file_chunks  # Free memory
+            del file_chunks
             
             result = self.security_manager.encrypt_data(data, self.password)
             encrypted_data = result['data']
             salt = result['salt']
             verification_hash = result.get('verification_hash', b'')
-            del data  # Free memory after encryption
+            del data
             
             enc_path = filepath + ".enc"
             
-            # Write encrypted data in chunks
             with open(enc_path, 'wb') as f:
                 f.write(salt)
                 f.write(verification_hash)
@@ -132,7 +125,6 @@ class EncryptionWorker(QObject):
                     f.write(encrypted_data[offset:offset + CHUNK_SIZE])
                     offset += CHUNK_SIZE
             
-            # Use follow_symlinks=False to prevent symlink attacks
             os.chmod(enc_path, 0o600, follow_symlinks=False)
             
             self.integrity_manager.log_audit_event(
@@ -140,7 +132,6 @@ class EncryptionWorker(QObject):
                 f"Encrypted to {os.path.basename(enc_path)} (size: {file_size} bytes)"
             )
             
-            # Move original file to quarantine instead of secure delete
             self._quarantine_file(filepath)
             
             return True
@@ -157,27 +148,22 @@ class EncryptionWorker(QObject):
             import shutil
             from datetime import datetime
             
-            # Skip symlinks
             if os.path.islink(filepath):
                 return False
             
-            # Create quarantine directory in same parent as file
             parent_dir = os.path.dirname(filepath)
             quarantine_dir = os.path.join(parent_dir, '.quarantine')
             
             if not os.path.exists(quarantine_dir):
                 os.makedirs(quarantine_dir, mode=0o700)
             
-            # Generate unique filename with timestamp
             filename = os.path.basename(filepath)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             quarantine_name = f"{timestamp}_{filename}"
             quarantine_path = os.path.join(quarantine_dir, quarantine_name)
             
-            # Move file to quarantine
             shutil.move(filepath, quarantine_path)
             
-            # Restrict permissions on quarantined file - use follow_symlinks=False
             os.chmod(quarantine_path, 0o600, follow_symlinks=False)
             
             self.integrity_manager.log_audit_event(
@@ -188,7 +174,6 @@ class EncryptionWorker(QObject):
             return True
             
         except Exception as e:
-            # If quarantine fails, log but don't fail encryption
             self.integrity_manager.log_audit_event(
                 'quarantine_failed', filepath,
                 f"Failed to quarantine: {str(e)}",

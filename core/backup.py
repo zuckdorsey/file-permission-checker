@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 import os
 import stat
 import shutil
@@ -367,7 +355,6 @@ class BackupManager:
             if not os.path.exists(backup_path):
                 return {'success': False, 'error': "Backup file not found"}
             
-            # Ensure restore_dir is absolute for security comparison
             restore_dir = os.path.abspath(restore_dir)
             
             checksum_path = backup_path + ".sha256"
@@ -387,7 +374,6 @@ class BackupManager:
                     try:
                         filename = os.path.basename(file_info['path'])
                         
-                        # ZIP SLIP PREVENTION: Validate target path
                         target_path = os.path.abspath(os.path.join(restore_dir, filename))
                         if not target_path.startswith(restore_dir + os.sep):
                             results['errors'].append(f"Blocked path traversal attempt: {filename}")
@@ -400,7 +386,6 @@ class BackupManager:
                         if 'permission' in file_info and file_info['permission'] != 'unknown':
                             try:
                                 old_mode = int(file_info['permission'], 8)
-                                # Use follow_symlinks=False to prevent symlink attacks
                                 os.chmod(restored_path, old_mode, follow_symlinks=False)
                             except (ValueError, OSError):
                                 pass

@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 import os
 import json
 from datetime import datetime
@@ -88,8 +76,8 @@ class PermissionPipeline:
         self.current_step = None
         self.pipeline_result = None
         self._is_cancelled = False
-        self._hashes_before = {}  # Store hashes for integrity comparison
-        self._encrypted_files = set()  # Track encrypted files (hash change expected)
+        self._hashes_before = {}
+        self._encrypted_files = set()
         
         self.progress_callback: Optional[Callable[[int, str], None]] = None
         self.step_callback: Optional[Callable[[PipelineStep, str], None]] = None
@@ -311,7 +299,7 @@ class PermissionPipeline:
                 file_hash = self.integrity_manager.calculate_sha256(filepath)
                 if file_hash:
                     hashes[filepath] = file_hash
-                    self._hashes_before[filepath] = file_hash  # Store for later comparison
+                    self._hashes_before[filepath] = file_hash
                     
                     current_mode = oct(os.stat(filepath).st_mode & 0o777)[2:]
                     self.integrity_manager.register_file_hash(filepath, current_mode)
@@ -496,13 +484,10 @@ class PermissionPipeline:
                 if file_hash:
                     hashes_after[filepath] = file_hash
                     
-                    # Compare with hash_before
                     hash_before = self._hashes_before.get(filepath)
                     
                     if hash_before and hash_before != file_hash:
-                        # Hash changed - check if file was encrypted
                         if filepath not in self._encrypted_files:
-                            # NOT encrypted but hash changed = DATA CORRUPTION
                             corrupted_files.append(filepath)
                             integrity_failed += 1
                             self.integrity_manager.log_audit_event(
@@ -512,7 +497,6 @@ class PermissionPipeline:
                                 severity='critical'
                             )
                         else:
-                            # Encrypted file - hash change expected
                             integrity_verified += 1
                     elif os.access(filepath, os.R_OK):
                         integrity_verified += 1
@@ -535,7 +519,6 @@ class PermissionPipeline:
                     'corrupted_files': corrupted_files
                 }, f, indent=2)
             
-            # CRITICAL: If any file was corrupted, fail and trigger rollback
             if corrupted_files:
                 return StepResult(
                     step=PipelineStep.HASH_AFTER,

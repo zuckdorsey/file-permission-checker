@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 import os
 import base64
 import json
@@ -99,10 +87,8 @@ class RateLimiter:
             try:
                 conn = sqlite3.connect(self.db_path, timeout=10)
                 
-                # Cleanup old attempts
                 self._cleanup_old_attempts(key, conn)
                 
-                # Count recent attempts
                 cursor = conn.cursor()
                 now = time.time()
                 cutoff = now - self.window_seconds
@@ -117,7 +103,6 @@ class RateLimiter:
                 
                 is_allowed = current_attempts < self.max_attempts
                 
-                # Calculate wait time if blocked
                 wait_time = 0
                 if not is_allowed:
                     conn = sqlite3.connect(self.db_path, timeout=10)
@@ -140,7 +125,6 @@ class RateLimiter:
                 
             except Exception as e:
                 print(f"Rate limit check failed: {e}")
-                # Fail open to prevent denial of service
                 return {'allowed': True, 'current_attempts': 0, 'remaining': self.max_attempts, 'wait_time': 0}
     
     def record_attempt(self, key: str, success: bool = False):
@@ -152,10 +136,8 @@ class RateLimiter:
                 cursor = conn.cursor()
                 
                 if success:
-                    # Clear all attempts on success
                     cursor.execute('DELETE FROM rate_limit_attempts WHERE key = ?', (key,))
                 else:
-                    # Record failed attempt
                     cursor.execute(
                         'INSERT INTO rate_limit_attempts (key, timestamp) VALUES (?, ?)',
                         (key, time.time())

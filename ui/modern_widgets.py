@@ -37,9 +37,9 @@ class GlassCard(QFrame):
     
     def _setup_style(self):
         self.setStyleSheet("""
-            QFrame#glassCard {
-                background: #1a1a1a;
-                border: 1px solid #333333;
+            QFrame
+                background:
+                border: 1px solid
                 border-radius: 8px;
             }
         """)
@@ -86,14 +86,12 @@ class ModernButton(QPushButton):
             'pressed': '#2a2a2a',
             'border': '#333333'
         },
-        # Encrypt mode - bright green
         'encrypt': {
             'bg': '#166534',
             'hover': '#15803d',
             'pressed': '#14532d',
             'border': '#22c55e'
         },
-        # Decrypt mode - bright blue  
         'decrypt': {
             'bg': '#1e40af',
             'hover': '#1d4ed8',

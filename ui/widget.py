@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 from PyQt5.QtWidgets import QLabel, QProgressBar, QTableWidgetItem
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
@@ -160,7 +148,6 @@ class RiskTableWidgetItem(QTableWidgetItem):
     }
     
     def __init__(self, text: str, risk_level: str = "Low"):
-        # Map display text to match risk level for proper labeling
         display_text = self.RISK_COLORS.get(risk_level, self.RISK_COLORS['Low']).get('label', text)
         super().__init__(display_text)
         self.risk_level = risk_level

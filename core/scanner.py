@@ -174,13 +174,11 @@ class ScanThread(QThread):
         """
         filename = os.path.basename(filepath).lower()
         
-        # Convert mode to integer for comparison
         try:
             mode_int = int(mode, 8)
         except ValueError:
-            mode_int = 0o644  # Default if parsing fails
+            mode_int = 0o644
         
-        # Define sensitivity categories
         high_sensitivity_extensions = [
             '.env', '.key', '.pem', '.crt', '.p12', '.pfx',
             '.pwd', '.password', '.secret', '.token',
@@ -215,10 +213,8 @@ class ScanThread(QThread):
             'makefile', 'rakefile',
         ]
         
-        # Determine file sensitivity level
         sensitivity = 'low'
         
-        # Check for high sensitivity
         if any(filepath.lower().endswith(ext) for ext in high_sensitivity_extensions):
             sensitivity = 'high'
         elif any(pattern in filename for pattern in high_sensitivity_patterns):
@@ -226,31 +222,25 @@ class ScanThread(QThread):
         elif any(f'/{dir_name}/' in filepath.lower() or filepath.lower().endswith(f'/{dir_name}') 
                for dir_name in high_sensitivity_dirs):
             sensitivity = 'high'
-        # Check for medium sensitivity
         elif any(filepath.lower().endswith(ext) for ext in medium_sensitivity_extensions):
             sensitivity = 'medium'
         elif any(pattern in filename for pattern in medium_sensitivity_patterns):
             sensitivity = 'medium'
-        # Ganti bagian elif is_symlink lama dengan ini:
         elif is_symlink:
             try:
                 target = os.readlink(filepath)
-                # Jika symlink mengarah ke absolute path (sistem) atau parent directory (..)
                 if os.path.isabs(target) or '..' in target:
-                    sensitivity = 'high'  # Potensi path traversal / system file access
+                    sensitivity = 'high'
                 else:
                     sensitivity = 'medium'
             except OSError:
                 sensitivity = 'medium'
             
-            # Symlink depth check: if target is system/sensitive path, mark as HIGH RISK
             try:
                 target = os.readlink(filepath)
-                # Resolve relative symlinks
                 if not os.path.isabs(target):
                     target = os.path.normpath(os.path.join(os.path.dirname(filepath), target))
                 
-                # List of system/sensitive paths
                 sensitive_system_paths = [
                     '/etc', '/bin', '/sbin', '/usr/bin', '/usr/sbin',
                     '/lib', '/lib64', '/usr/lib',
@@ -260,49 +250,36 @@ class ScanThread(QThread):
                     '/etc/passwd', '/etc/shadow', '/etc/sudoers',
                 ]
                 
-                # Check if symlink points to sensitive path
                 for sensitive_path in sensitive_system_paths:
                     if target.startswith(sensitive_path) or sensitive_path in target:
-                        return 'High'  # Symlink to system path = HIGH RISK
+                        return 'High'
                         
             except (OSError, ValueError):
-                # Can't resolve symlink, treat as medium risk
                 pass
         
-        # Apply sensitivity + permission matrix
         if sensitivity == 'high':
-            # High sensitivity files: must be 600 or stricter (e.g., 400, 500)
-            # Check if others or group have any permissions
-            others_perms = mode_int & 0o007  # Last 3 bits
-            group_perms = mode_int & 0o070   # Middle 3 bits
+            others_perms = mode_int & 0o007
+            group_perms = mode_int & 0o070
             
             if others_perms > 0 or group_perms > 0:
-                # Loose permissions on sensitive file = HIGH RISK
                 return 'High'
             elif (mode_int & 0o777) > 0o600:
-                # Owner has more than rw (e.g., 700 with execute might be needed for dirs)
-                # Still consider it if group/others can access
                 return 'High' if (mode_int & 0o077) > 0 else 'Low'
             else:
-                # Properly secured (600 or stricter like 400)
                 return 'Low'
         
         elif sensitivity == 'medium':
-            # Medium sensitivity: should be 644 or stricter
-            others_write = mode_int & 0o002  # Others write
-            group_write = mode_int & 0o020   # Group write
+            others_write = mode_int & 0o002
+            group_write = mode_int & 0o020
             
             if others_write > 0 or group_write > 0:
-                # World/group writable = Medium Risk
                 return 'Medium'
             elif (mode_int & 0o777) > 0o755:
-                # Too permissive
                 return 'Medium'
             else:
                 return 'Low'
         
         else:
-            # Low sensitivity: always Low Risk
             return 'Low'
     
     def _check_custom_rules(self, filepath: str) -> Optional[str]:

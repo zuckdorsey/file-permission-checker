@@ -1,15 +1,3 @@
-"""╔══════════════════════════════════════════════════════════════════╗
-║    ____                 _                      _                  ║
-║   |  _ \  _____   _____| | ___  _ __   ___  __| |                ║
-║   | | | |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \/ _` |               ║
-║   | |_| |  __/\ V /  __/ | (_) | |_) |  __/ (_| |               ║
-║   |____/ \___| \_/ \___|_|\___/| .__/ \___|\__,_|               ║
-║                                 |_|                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  by zuckdorsey • 2025                                         ║
-║  https://github.com/zuckdorsey                                                       ║
-╚══════════════════════════════════════════════════════════════════╝"""
-
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, 
     QPushButton, QCheckBox, QGroupBox, QGridLayout, QDialogButtonBox,
@@ -714,7 +702,6 @@ class ConfirmationDialog(ModernDialog):
         
         style = self.SEVERITY_STYLES.get(self.severity, self.SEVERITY_STYLES['warning'])
         
-        # Header with icon
         header_layout = QHBoxLayout()
         
         icon_label = QLabel(style['icon'])
@@ -743,22 +730,20 @@ class ConfirmationDialog(ModernDialog):
         
         layout.addLayout(header_layout)
         
-        # Message
         msg_label = QLabel(self.message)
         msg_label.setWordWrap(True)
         msg_label.setStyleSheet("""
-            color: #e5e5e5;
+            color:
             font-size: 14px;
             line-height: 1.5;
         """)
         layout.addWidget(msg_label)
         
-        # Details (if provided)
         if self.details:
             details_label = QLabel(self.details)
             details_label.setWordWrap(True)
             details_label.setStyleSheet(f"""
-                color: #a3a3a3;
+                color:
                 font-size: 12px;
                 background: {style['bg']};
                 border: 1px solid {style['color']}40;
@@ -767,7 +752,6 @@ class ConfirmationDialog(ModernDialog):
             """)
             layout.addWidget(details_label)
         
-        # Checkbox for dangerous actions
         if self.severity == 'danger':
             self.confirm_checkbox = QCheckBox("I understand this action cannot be undone")
             self.confirm_checkbox.setStyleSheet(f"color: {style['color']};")
@@ -777,20 +761,19 @@ class ConfirmationDialog(ModernDialog):
         
         layout.addSpacing(8)
         
-        # Buttons
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setStyleSheet("""
             QPushButton {
-                background: #1f1f1f;
-                border: 1px solid #333333;
-                color: #a3a3a3;
+                background:
+                border: 1px solid
+                color:
                 min-width: 80px;
             }
             QPushButton:hover {
-                background: #262626;
+                background:
             }
         """)
         cancel_btn.clicked.connect(self.reject)
@@ -801,7 +784,7 @@ class ConfirmationDialog(ModernDialog):
             QPushButton {{
                 background: {style['color']};
                 border: none;
-                color: #0d0d0d;
+                color:
                 font-weight: 600;
                 min-width: 100px;
             }}
@@ -809,14 +792,13 @@ class ConfirmationDialog(ModernDialog):
                 background: {style['color']}dd;
             }}
             QPushButton:disabled {{
-                background: #333333;
-                color: #666666;
+                background:
+                color:
             }}
         """)
         confirm_btn.clicked.connect(self._handle_confirm)
         self.confirm_btn = confirm_btn
         
-        # Disable confirm button until checkbox is checked for danger actions
         if self.confirm_checkbox:
             confirm_btn.setEnabled(False)
             self.confirm_checkbox.toggled.connect(confirm_btn.setEnabled)
